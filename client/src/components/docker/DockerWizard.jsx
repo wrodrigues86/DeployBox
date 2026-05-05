@@ -4,7 +4,7 @@ import axios from 'axios'
 const api = axios.create({ baseURL: '/api' })
 
 const steps = ['basic', 'source', 'build', 'runtime', 'domain', 'review']
-const templates = ['node', 'php', 'python', 'nginx', 'blank']
+const templates = ['node', 'php', 'python', 'nginx', 'dotnet', 'blank']
 
 function slugify(v = '') {
   return String(v).toLowerCase().trim().replace(/[^a-z0-9-_\s]/g, '').replace(/\s+/g, '-')

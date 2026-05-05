@@ -1403,8 +1403,20 @@ function ProjectList({
   t,
 }) {
   const [createOpen, setCreateOpen] = useState(false)
+  const [createSession, setCreateSession] = useState(0)
   const [search, setSearch] = useState('')
   const [form, setForm] = useState({ name: '', slug: '', description: '', type: 'api', worker_mode: 'manual' })
+  const defaultCreateForm = { name: '', slug: '', description: '', type: 'api', worker_mode: 'manual' }
+  function openCreateModal() {
+    setForm(defaultCreateForm)
+    setCreateSession((v) => v + 1)
+    setCreateOpen(true)
+  }
+  function closeCreateModal() {
+    setCreateOpen(false)
+    setForm(defaultCreateForm)
+    setCreateSession((v) => v + 1)
+  }
   const filteredProjects = projects.filter((p) => {
     const term = search.trim().toLowerCase()
     if (!term) return true
@@ -1426,7 +1438,7 @@ function ProjectList({
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold">{t('projects_list_title', 'Lista de projetos')}</h2>
         <div className="flex items-center gap-2">
-          <button className="btn border-panel-accent text-panel-accent" onClick={() => setCreateOpen(true)}>{t('action_create_new', 'Criar novo')}</button>
+          <button className="btn border-panel-accent text-panel-accent" onClick={openCreateModal}>{t('action_create_new', 'Criar novo')}</button>
           <button className="btn" onClick={onRefresh}>{t('action_refresh', 'Atualizar')}</button>
         </div>
       </div>
@@ -1501,7 +1513,7 @@ function ProjectList({
           <div className="card w-full max-w-xl p-5">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-semibold">{t('projects_create_title', 'Criar novo projeto')}</h3>
-              <button className="btn px-2 py-1" onClick={() => setCreateOpen(false)}>{t('action_close', 'Fechar')}</button>
+              <button className="btn px-2 py-1" onClick={closeCreateModal}>{t('action_close', 'Fechar')}</button>
             </div>
             <div className="space-y-3">
               <select className="input" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
@@ -1512,10 +1524,11 @@ function ProjectList({
               </select>
               {form.type === 'docker' ? (
                 <DockerWizard
+                  key={createSession}
                   authHeaders={authHeaders}
                   t={t}
                   loading={loading}
-                  onCancel={() => setCreateOpen(false)}
+                  onCancel={closeCreateModal}
                   onCreate={async (dockerPayload) => {
                     const created = await onCreate({
                       name: dockerPayload.name,
@@ -1552,8 +1565,7 @@ function ProjectList({
                         { headers: authHeaders },
                       )
                     }
-                    setCreateOpen(false)
-                    setForm({ name: '', slug: '', description: '', type: 'api', worker_mode: 'manual' })
+                    closeCreateModal()
                   }}
                 />
               ) : (
@@ -1575,8 +1587,7 @@ function ProjectList({
                     disabled={loading}
                     onClick={async () => {
                       await onCreate(form)
-                      setCreateOpen(false)
-                      setForm({ name: '', slug: '', description: '', type: 'api', worker_mode: 'manual' })
+                      closeCreateModal()
                     }}
                   >
                     {loading ? t('action_creating', 'Criando...') : t('action_create_project', 'Criar projeto')}
