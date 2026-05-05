@@ -30,3 +30,4 @@ jobs:
 
             echo "Reiniciando aplicação..."
             pm2 reload nodepanel || pm2 start ecosystem.config.js
+            # teste
