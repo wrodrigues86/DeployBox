@@ -1,0 +1,17 @@
+{
+  "app_title": "NodePanel",
+  "menu_dashboard": "Dashboard",
+  "menu_projects": "Projetos",
+  "menu_sql": "SQL",
+  "menu_logs": "Logs",
+  "menu_settings": "Configurações",
+  "logout": "Sair",
+  "settings_title": "Configurações da Aplicação",
+  "settings_save": "Salvar Configurações",
+  "settings_health_title": "Saúde do Sistema",
+  "settings_health_btn": "Testar /api/health",
+  "settings_users_title": "Usuários e Permissões",
+  "settings_translations_title": "Traduções",
+  "settings_translations_hint": "Edite o JSON em /translations/pt-BR.json (somente full_admin).",
+  "settings_translations_save": "Salvar Traduções"
+}

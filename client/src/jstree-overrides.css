@@ -1,0 +1,23 @@
+.jstree-nodepanel.jstree-default .jstree-wholerow-clicked,
+.jstree-nodepanel.jstree-default .jstree-wholerow-hovered {
+  background: rgba(30, 41, 59, 0.92) !important;
+}
+
+.jstree-nodepanel.jstree-default .jstree-anchor.jstree-clicked,
+.jstree-nodepanel.jstree-default .jstree-anchor.jstree-hovered {
+  background: rgba(30, 41, 59, 0.92) !important;
+  color: rgb(241 245 249) !important;
+  text-shadow: none !important;
+}
+
+.jstree-nodepanel.jstree-default .jstree-anchor,
+.jstree-nodepanel.jstree-default .jstree-anchor:link,
+.jstree-nodepanel.jstree-default .jstree-anchor:visited,
+.jstree-nodepanel.jstree-default .jstree-anchor:active {
+  color: rgb(203 213 225) !important;
+}
+
+.jstree-nodepanel.jstree-default .jstree-anchor.jstree-clicked .jstree-themeicon,
+.jstree-nodepanel.jstree-default .jstree-anchor.jstree-hovered .jstree-themeicon {
+  color: rgb(241 245 249) !important;
+}

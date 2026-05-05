@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-panel-bg text-panel-text;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+  line-height: 1.45;
+}
+
+.card {
+  @apply rounded-xl border border-panel-border bg-panel-card shadow-sm;
+}
+
+.btn {
+  @apply rounded-lg border border-panel-border px-4 py-2.5 text-sm transition hover:border-panel-accent;
+}
+
+.input {
+  @apply w-full rounded-lg border border-panel-border bg-slate-900 px-3.5 py-2.5 text-sm outline-none focus:border-panel-accent;
+}
+
+.login-shell {
+  background:
+    radial-gradient(55% 50% at 50% 100%, rgba(14, 165, 233, 0.28) 0%, rgba(14, 165, 233, 0) 78%),
+    radial-gradient(38% 30% at 50% 0%, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0) 84%),
+    linear-gradient(180deg, #030b1f 0%, #020817 50%, #020617 100%);
+}
+
+.login-card {
+  border: 1px solid rgba(71, 85, 105, 0.55);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(13, 28, 64, 0.8), rgba(9, 18, 41, 0.74));
+  box-shadow: 0 10px 28px rgba(2, 8, 23, 0.58), inset 0 1px 0 rgba(148, 163, 184, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.login-logo {
+  mix-blend-mode: screen;
+  filter: brightness(1.05) contrast(1.08) drop-shadow(0 8px 26px rgba(56, 189, 248, 0.22));
+}
+
+.login-input {
+  height: 46px;
+  border-color: rgba(71, 85, 105, 0.6);
+  border-radius: 10px;
+  background: linear-gradient(110deg, rgba(30, 41, 59, 0.74), rgba(30, 41, 59, 0.5));
+  padding: 0 14px;
+  font-size: 0.95rem;
+  color: #e2e8f0;
+}
+
+.login-input::placeholder {
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.login-btn {
+  height: 46px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  background: linear-gradient(90deg, #1e90ff 0%, #6f45ff 100%);
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+
+@media (max-width: 640px) {
+  .login-input,
+  .login-btn {
+    height: 44px;
+    font-size: 0.95rem;
+  }
+}
+
+.jstree-nodepanel .jstree-anchor {
+  color: rgb(203 213 225);
+}
+
+.jstree-nodepanel .jstree-clicked,
+.jstree-nodepanel .jstree-hovered,
+.jstree-default .jstree-nodepanel .jstree-clicked,
+.jstree-default .jstree-nodepanel .jstree-hovered {
+  background: rgba(14, 165, 233, 0.18) !important;
+  color: rgb(226 232 240) !important;
+  border-radius: 6px;
+}
+
+.jstree-nodepanel .jstree-wholerow-clicked,
+.jstree-nodepanel .jstree-wholerow-hovered,
+.jstree-default .jstree-nodepanel .jstree-wholerow-clicked,
+.jstree-default .jstree-nodepanel .jstree-wholerow-hovered {
+  background: rgba(14, 165, 233, 0.14) !important;
+}
+
+.jstree-default .jstree-nodepanel .jstree-anchor.jstree-clicked,
+.jstree-default .jstree-nodepanel .jstree-anchor.jstree-hovered {
+  box-shadow: none !important;
+}
+
+/* jsTree aplica classes no mesmo elemento raiz (ex.: .jstree-nodepanel.jstree-default),
+   então precisamos destas regras para garantir contraste no tema escuro. */
+.jstree-nodepanel.jstree-default .jstree-wholerow-clicked,
+.jstree-nodepanel.jstree-default .jstree-wholerow-hovered {
+  background: rgba(30, 41, 59, 0.92) !important;
+}
+
+.jstree-nodepanel.jstree-default .jstree-anchor.jstree-clicked,
+.jstree-nodepanel.jstree-default .jstree-anchor.jstree-hovered {
+  background: transparent !important;
+  color: rgb(241 245 249) !important;
+  text-shadow: none !important;
+}
+
+.jstree-nodepanel.jstree-default .jstree-anchor.jstree-clicked .jstree-themeicon,
+.jstree-nodepanel.jstree-default .jstree-anchor.jstree-hovered .jstree-themeicon {
+  color: rgb(241 245 249) !important;
+}

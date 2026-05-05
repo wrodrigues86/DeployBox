@@ -1,0 +1,8 @@
+node_modules/
+**/node_modules/
+client/dist/
+projects/
+*.db
+*.db-shm
+*.db-wal
+npm-debug.log*

@@ -1,0 +1,28 @@
+
+> nodepanel@1.0.0 dev
+> concurrently "npm run dev -w server" "npm run dev -w client"
+
+[0] 
+[0] > nodepanel-server@1.0.0 dev
+[0] > node --watch src/index.js
+[0] 
+[1] 
+[1] > nodepanel-client@1.0.0 dev
+[1] > vite
+[1] 
+[1] 
+[1]   [32m[1mVITE[22m v6.4.2[39m  [2mready in [0m[1m486[22m[2m[0m ms[22m
+[1] 
+[1]   [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+[1] [2m  [32m➜[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[0] NodePanel server running on http://localhost:4000
+[0] Login padrÃ£o: admin@nodepanel.local / admin123
+[0] Restarting 'src/index.js'
+[0] NodePanel server running on http://localhost:4000
+[0] Login padrÃ£o: admin@nodepanel.local / admin123
+[0] Restarting 'src/index.js'
+[1] [2m19:24:46[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dashboard/stats[39m
+[1] Error: read ECONNRESET
+[1]     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[0] NodePanel server running on http://localhost:4000
+[0] Login padrÃ£o: admin@nodepanel.local / admin123
