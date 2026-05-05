@@ -8,37 +8,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Conectar e fazer deploy
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Build do projeto
+        run: |
+          npm install
+          npm run build
+
+      - name: Enviar arquivos via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "dist/*"   # ou build/* dependendo do seu projeto
+          target: "/home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br"
+
+      - name: Executar pós-deploy
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            set -e
-
-            echo "📁 Entrando no projeto..."
             cd /home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br
 
-            echo "🔄 Garantindo acesso ao git..."
-            git config --global --add safe.directory $(pwd)
+            echo "📦 Instalando dependências..."
+            npm install --omit=dev
 
-            echo "📥 Atualizando código..."
-            git fetch --all
-            git reset --hard origin/main
-
-            echo "📦 Instalando dependências limpas..."
-            rm -rf node_modules package-lock.json
-            npm install
-
-            echo "🔧 Rebuild nativo (sqlite etc)..."
+            echo "🔧 Rebuild sqlite..."
             npm rebuild better-sqlite3 || true
 
-            echo "🚀 Reiniciando aplicação..."
-            pm2 delete nodepanel || true
-            pm2 start ecosystem.config.js
+            echo "🚀 Reiniciando..."
+            pm2 restart nodepanel || pm2 start ecosystem.config.js
 
-            echo "💾 Salvando estado do PM2..."
             pm2 save
-
-            echo "✅ Deploy finalizado"
