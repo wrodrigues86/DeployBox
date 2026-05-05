@@ -15,6 +15,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
   const [repos, setRepos] = useState([])
   const [branches, setBranches] = useState([])
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
   const [form, setForm] = useState({
     name: '', slug: '', description: '', template: 'node',
     sourceType: 'template', repository: '', branch: '', subPath: '/', dockerfilePath: './Dockerfile',
@@ -73,9 +74,22 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
   }
 
   async function submit(mode) {
+    setError('')
+    const portExt = Number(form.externalPort || 0)
+    const portInt = Number(form.internalPort || 0)
+    if (!form.name.trim()) return setError('Informe o nome do projeto.')
+    if (!form.slug.trim()) return setError('Informe o slug do projeto.')
+    if (!Number.isInteger(portExt) || portExt < 1 || portExt > 65535) return setError('Porta externa inválida.')
+    if (!Number.isInteger(portInt) || portInt < 1 || portInt > 65535) return setError('Porta interna inválida.')
+    if (form.sourceType === 'github' && !form.repository) return setError('Selecione um repositório GitHub.')
+    if (form.sourceType === 'github' && !form.branch) return setError('Selecione uma branch.')
+    if (form.subdomain && !form.domainBase) return setError('Informe o domínio base.')
+    if (form.domainBase && !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(form.domainBase)) return setError('Domínio base inválido.')
     setBusy(true)
     try {
       await onCreate({ ...form, mode })
+    } catch (err) {
+      setError(err?.response?.data?.error || err?.message || 'Falha ao criar projeto Docker.')
     } finally {
       setBusy(false)
     }
@@ -147,6 +161,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
         <button className="btn border-panel-accent text-panel-accent" disabled={loading || busy} onClick={() => submit('create')}>{busy ? '...' : t('action_create_project', 'Criar projeto')}</button>
         <button className="btn border-emerald-500 text-emerald-300" disabled={loading || busy} onClick={() => submit('deploy')}>{busy ? '...' : t('docker.actions.deploy', 'Deploy')}</button>
       </div>
+      {!!error && <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</div>}
     </div>
   )
 }
