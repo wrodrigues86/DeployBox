@@ -558,7 +558,8 @@ export default function App() {
                 onCreate={async (payload) => {
                   setLoading(true)
                   try {
-                    const { data } = await api.post('/projects', payload, { headers: authHeaders })
+                    const isDockerPayload = String(payload?.type || '') === 'docker'
+                    const { data } = await api.post('/projects', payload, { headers: authHeaders, skipNotify: isDockerPayload })
                     await refreshProjects()
                     return data
                   } finally {
@@ -1548,11 +1549,11 @@ function ProjectList({
                       ['DOCKER_ENABLE_SSL', dockerPayload.enableSSL ? '1' : '0'],
                       ['DOCKER_FORCE_HTTPS', dockerPayload.forceHTTPS ? '1' : '0'],
                     ]
-                    await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${created.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders })))
+                    await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${created.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders, skipNotify: true })))
                     const token = localStorage.getItem('nodepanel_github_token') || ''
                     if (dockerPayload.sourceType === 'github' && dockerPayload.repository && token) {
                       const repoUrl = dockerPayload.repository.startsWith('http') ? dockerPayload.repository : `https://github.com/${dockerPayload.repository}.git`
-                      await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders })
+                      await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders, skipNotify: true })
                     }
                     if (dockerPayload.sourceType !== 'github') {
                       const template = String(dockerPayload.template || 'node')
@@ -1582,20 +1583,20 @@ function ProjectList({
                         },
                       }[template] || {}
                       if (templateFiles.dockerfile) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'Dockerfile', content: templateFiles.dockerfile }, { headers: authHeaders })
+                        await api.put(`/projects/${created.id}/file`, { path: 'Dockerfile', content: templateFiles.dockerfile }, { headers: authHeaders, skipNotify: true })
                       }
                       if (template === 'node' && templateFiles.app) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'app.js', content: templateFiles.app }, { headers: authHeaders })
-                        await api.put(`/projects/${created.id}/file`, { path: 'package.json', content: templateFiles.packageJson }, { headers: authHeaders })
+                        await api.put(`/projects/${created.id}/file`, { path: 'app.js', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
+                        await api.put(`/projects/${created.id}/file`, { path: 'package.json', content: templateFiles.packageJson }, { headers: authHeaders, skipNotify: true })
                       }
                       if (template === 'php' && templateFiles.app) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'index.php', content: templateFiles.app }, { headers: authHeaders })
+                        await api.put(`/projects/${created.id}/file`, { path: 'index.php', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
                       }
                       if (template === 'python' && templateFiles.app) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'app.py', content: templateFiles.app }, { headers: authHeaders })
+                        await api.put(`/projects/${created.id}/file`, { path: 'app.py', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
                       }
                       if (template === 'nginx' && templateFiles.app) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'index.html', content: templateFiles.app }, { headers: authHeaders })
+                        await api.put(`/projects/${created.id}/file`, { path: 'index.html', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
                       }
                     }
                     if (dockerPayload.mode === 'deploy') {
@@ -1616,9 +1617,10 @@ function ProjectList({
                           port: String(dockerPayload.externalPort || '3000'),
                           containerPort: String(dockerPayload.internalPort || '3000'),
                         },
-                        { headers: authHeaders },
+                        { headers: authHeaders, skipNotify: true },
                       )
                     }
+                    notifyUi(dockerPayload.mode === 'deploy' ? 'Projeto Docker criado e deploy iniciado.' : 'Projeto Docker criado com sucesso.')
                     closeCreateModal()
                   }}
                 />

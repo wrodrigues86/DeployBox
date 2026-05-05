@@ -2,6 +2,10 @@
 import axios from 'axios'
 
 const api = axios.create({ baseURL: '/api' })
+const notify = (message, type = 'success') => {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent('nodepanel:notify', { detail: { message, type } }))
+}
 
 function envRowsToMap(rows = []) {
   const out = {}
@@ -73,11 +77,12 @@ export default function useDockerConfig(project, authHeaders) {
         ['DOCKER_DOCKERFILE_PATH', String(nextConfig.dockerfilePath || './Dockerfile')],
         ['DOCKER_BUILD_CONTEXT', String(nextConfig.buildContext || '.')],
       ]
-      await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${project.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders })))
+      await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${project.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders, skipNotify: true })))
       if (typeof nextConfig.dockerfile === 'string' && nextConfig.dockerfile.trim()) {
-        await api.put(`/projects/${project.id}/file`, { path: 'Dockerfile', content: nextConfig.dockerfile }, { headers: authHeaders })
+        await api.put(`/projects/${project.id}/file`, { path: 'Dockerfile', content: nextConfig.dockerfile }, { headers: authHeaders, skipNotify: true })
       }
       setConfig(nextConfig)
+      notify('Configurações Docker salvas.')
     } finally {
       setSaving(false)
     }
@@ -94,29 +99,34 @@ export default function useDockerConfig(project, authHeaders) {
 
   const handleBuild = useCallback((nextConfig) => withAction('build', async () => {
     const payload = { dockerfile: String(nextConfig?.dockerfile || config?.dockerfile || ''), port: String(nextConfig?.externalPort || config?.externalPort || '3000'), containerPort: String(nextConfig?.internalPort || config?.internalPort || '3000') }
-    const { data } = await api.post(`/projects/${project.id}/docker/run-dockerfile`, payload, { headers: authHeaders })
+    const { data } = await api.post(`/projects/${project.id}/docker/run-dockerfile`, payload, { headers: authHeaders, skipNotify: true })
     setLogsOutput(String(data?.output || 'build_ok'))
+    notify('Build Docker concluído.')
     return data
   }), [project?.id, authHeaders, withAction, config])
 
   const handleRun = useCallback(() => withAction('run', async () => {
-    const { data } = await api.post(`/projects/${project.id}/toggle`, {}, { headers: authHeaders })
+    const { data } = await api.post(`/projects/${project.id}/toggle`, {}, { headers: authHeaders, skipNotify: true })
+    notify('Projeto iniciado.')
     return data
   }), [project?.id, authHeaders, withAction])
 
   const handleStop = useCallback(() => withAction('stop', async () => {
-    const { data } = await api.post(`/projects/${project.id}/toggle`, {}, { headers: authHeaders })
+    const { data } = await api.post(`/projects/${project.id}/toggle`, {}, { headers: authHeaders, skipNotify: true })
+    notify('Projeto parado.')
     return data
   }), [project?.id, authHeaders, withAction])
 
   const handleRestart = useCallback(() => withAction('restart', async () => {
-    const { data } = await api.post(`/projects/${project.id}/restart`, {}, { headers: authHeaders })
+    const { data } = await api.post(`/projects/${project.id}/restart`, {}, { headers: authHeaders, skipNotify: true })
+    notify('Projeto reiniciado.')
     return data
   }), [project?.id, authHeaders, withAction])
 
   const handleRebuild = useCallback((nextConfig) => withAction('rebuild', async () => {
     const data = await handleBuild(nextConfig)
-    await api.post(`/projects/${project.id}/restart`, {}, { headers: authHeaders })
+    await api.post(`/projects/${project.id}/restart`, {}, { headers: authHeaders, skipNotify: true })
+    notify('Rebuild e deploy concluídos.')
     return data
   }), [project?.id, authHeaders, handleBuild, withAction])
 

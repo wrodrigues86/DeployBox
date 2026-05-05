@@ -26,6 +26,7 @@ export default function DockerDashboard({ project, authHeaders, onSaved, t }) {
   if (loading || !config) return <div className="card mt-3 p-4 text-sm text-slate-300">loading docker...</div>
 
   const urlPreview = config.subdomain && config.domainBase ? `${config.subdomain}.${config.domainBase}` : '-'
+  const ipPreview = `${window.location.protocol}//${window.location.hostname}:${config.externalPort || '3000'}`
   const cmdPreview = `docker build -t deploybox-${project.slug}:latest .`
 
   return (
@@ -37,6 +38,7 @@ export default function DockerDashboard({ project, authHeaders, onSaved, t }) {
         <div className="text-sm">image: deploybox-{project.slug}:latest</div>
         <div className="text-sm">ports: {config.externalPort} -&gt; {config.internalPort}</div>
         <div className="text-sm">domain: {urlPreview}</div>
+        <div className="text-sm">ip: {ipPreview}</div>
         <div className="flex flex-wrap gap-2">
           <button className="btn" disabled={!!actionLoading} onClick={async () => { await handleRun(); onSaved?.() }}>start</button>
           <button className="btn" disabled={!!actionLoading} onClick={async () => { await handleStop(); onSaved?.() }}>stop</button>

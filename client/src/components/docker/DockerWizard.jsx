@@ -32,6 +32,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
     if (!form.subdomain || !form.domainBase) return '-'
     return `${form.subdomain}.${form.domainBase}`
   }, [form.subdomain, form.domainBase])
+  const ipPreview = useMemo(() => `${window.location.protocol}//${window.location.hostname}:${form.externalPort || '3000'}`, [form.externalPort])
 
   useEffect(() => {
     if (!form.slug) setForm((prev) => ({ ...prev, slug: slugify(prev.name) }))
@@ -145,13 +146,14 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
       {step === 4 && <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2"><input className="input" value={form.subdomain} onChange={(e) => setForm({ ...form, subdomain: e.target.value })} placeholder="subdomain" /><input className="input" value={form.domainBase} onChange={(e) => setForm({ ...form, domainBase: e.target.value })} placeholder="domain" /></div>
         <div className="rounded-lg border border-panel-border bg-slate-950/40 px-3 py-2 text-xs">{finalDomainPreview}</div>
+        <div className="rounded-lg border border-panel-border bg-slate-950/40 px-3 py-2 text-xs">Fallback IP: {ipPreview}</div>
         <label className="btn flex items-center gap-2"><input type="checkbox" checked={form.enableSSL} onChange={(e) => setForm({ ...form, enableSSL: e.target.checked })} />enableSSL</label>
         <label className="btn flex items-center gap-2"><input type="checkbox" checked={form.forceHTTPS} onChange={(e) => setForm({ ...form, forceHTTPS: e.target.checked })} />forceHTTPS</label>
       </div>}
 
       {step === 5 && <div className="space-y-2 text-sm">
         <div>Nome: {form.name}</div><div>Repo: {form.repository || '-'}</div><div>Branch: {form.branch || '-'}</div><div>Dockerfile: {form.dockerfilePath}</div>
-        <div>Porta: {form.externalPort} -&gt; {form.internalPort}</div><div>Domínio: {finalDomainPreview}</div><div>SSL: {form.enableSSL ? 'on' : 'off'}</div>
+        <div>Porta: {form.externalPort} -&gt; {form.internalPort}</div><div>Domínio: {finalDomainPreview}</div><div>Fallback IP: {ipPreview}</div><div>SSL: {form.enableSSL ? 'on' : 'off'}</div>
       </div>}
 
       <div className="flex flex-wrap gap-2">
