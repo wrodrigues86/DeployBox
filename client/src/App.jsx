@@ -1406,6 +1406,7 @@ function ProjectList({
   const [createOpen, setCreateOpen] = useState(false)
   const [createSession, setCreateSession] = useState(0)
   const [search, setSearch] = useState('')
+  const [dockerPorts, setDockerPorts] = useState({})
   const [form, setForm] = useState({ name: '', slug: '', description: '', type: 'api', worker_mode: 'manual' })
   const defaultCreateForm = { name: '', slug: '', description: '', type: 'api', worker_mode: 'manual' }
   function openCreateModal() {
@@ -1431,8 +1432,41 @@ function ProjectList({
   const totalApi = projects.filter((p) => p.type === 'api').length
   const totalApp = projects.filter((p) => p.type === 'app').length
   const totalWorker = projects.filter((p) => p.type === 'worker').length
-  const defaultAppBaseUrl = window.location.port === '5173' ? 'http://localhost:4000' : window.location.origin
+  const defaultAppBaseUrl = window.location.port === '5173'
+    ? `${window.location.protocol}//${window.location.hostname}:4000`
+    : window.location.origin
   const appBaseUrl = (localStorage.getItem('nodepanel_app_base_url') || defaultAppBaseUrl).replace(/\/$/, '')
+  useEffect(() => {
+    const dockerProjects = projects.filter((p) => p.type === 'docker')
+    if (!dockerProjects.length) {
+      setDockerPorts({})
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      const pairs = await Promise.all(
+        dockerProjects.map(async (p) => {
+          try {
+            const { data } = await api.get(`/projects/${p.id}/env`, { headers: authHeaders, skipNotify: true })
+            const portRow = (data || []).find((row) => row.envKey === 'DOCKER_HOST_PORT')
+            return [p.id, String(portRow?.envValue || '3000')]
+          } catch (_) {
+            return [p.id, '3000']
+          }
+        }),
+      )
+      if (cancelled) return
+      setDockerPorts(Object.fromEntries(pairs))
+    })()
+    return () => { cancelled = true }
+  }, [projects, authHeaders])
+  const projectOpenUrl = (p) => {
+    if (p.type === 'docker') {
+      const port = dockerPorts[p.id] || '3000'
+      return `${window.location.protocol}//${window.location.hostname}:${port}`
+    }
+    return `${appBaseUrl}/${p.slug}`
+  }
 
   return (
     <div className="card p-5 lg:p-6">
@@ -1470,7 +1504,7 @@ function ProjectList({
                 <button className="min-w-0 flex-1 text-left" onClick={() => onSelect(p)}>
                   <a
                     className="truncate font-medium underline underline-offset-2"
-                    href={`${appBaseUrl}/${p.slug}`}
+                    href={projectOpenUrl(p)}
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
@@ -2070,7 +2104,9 @@ CMD ["nginx", "-g", "daemon off;"]`,
 
   const cronExpr = cronPresetToExpr(preset, time, custom)
   const normalizedPath = testPath.startsWith('/') ? testPath : `/${testPath}`
-  const defaultAppBaseUrl = window.location.port === '5173' ? 'http://localhost:4000' : window.location.origin
+  const defaultAppBaseUrl = window.location.port === '5173'
+    ? `${window.location.protocol}//${window.location.hostname}:4000`
+    : window.location.origin
   const appBaseUrl = (localStorage.getItem('nodepanel_app_base_url') || defaultAppBaseUrl).replace(/\/$/, '')
   const testUrl = normalizedPath === '/' ? `${appBaseUrl}/${project.slug}` : `${appBaseUrl}/${project.slug}${normalizedPath}`
   const selectedFileMeta = projectFiles.find((file) => file.path === selectedFilePath)
