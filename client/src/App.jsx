@@ -1554,11 +1554,65 @@ function ProjectList({
                       const repoUrl = dockerPayload.repository.startsWith('http') ? dockerPayload.repository : `https://github.com/${dockerPayload.repository}.git`
                       await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders })
                     }
+                    if (dockerPayload.sourceType !== 'github') {
+                      const template = String(dockerPayload.template || 'node')
+                      const templateFiles = {
+                        node: {
+                          dockerfile: `FROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install --omit=dev || true\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"node\", \"app.js\"]\n`,
+                          app: "const http = require('node:http');\nconst port = Number(process.env.PORT || 3000);\nhttp.createServer((_, res) => res.end('DeployBox Node OK')).listen(port);\n",
+                          packageJson: '{\n  "name": "deploybox-node-app",\n  "private": true,\n  "version": "1.0.0"\n}\n',
+                        },
+                        php: {
+                          dockerfile: `FROM php:8.2-apache\nWORKDIR /var/www/html\nCOPY . .\nRUN sed -i 's/Listen 80/Listen ${dockerPayload.internalPort || '3000'}/g' /etc/apache2/ports.conf && sed -i 's/:80>/:${dockerPayload.internalPort || '3000'}>/g' /etc/apache2/sites-available/000-default.conf\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"apache2-foreground\"]\n`,
+                          app: "<?php echo 'DeployBox PHP OK';",
+                        },
+                        python: {
+                          dockerfile: `FROM python:3.12-slim\nWORKDIR /app\nRUN pip install --no-cache-dir flask\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"python\", \"app.py\"]\n`,
+                          app: "from flask import Flask\napp = Flask(__name__)\n@app.get('/')\ndef home(): return {'ok': True, 'app': 'DeployBox Python'}\napp.run(host='0.0.0.0', port=3000)\n",
+                        },
+                        nginx: {
+                          dockerfile: `FROM nginx:alpine\nCOPY . /usr/share/nginx/html\nRUN sed -i 's/listen       80;/listen       ${dockerPayload.internalPort || '3000'};/g' /etc/nginx/conf.d/default.conf\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"nginx\", \"-g\", \"daemon off;\"]\n`,
+                          app: '<h1>DeployBox Nginx OK</h1>',
+                        },
+                        dotnet: {
+                          dockerfile: `FROM mcr.microsoft.com/dotnet/sdk:8.0\nWORKDIR /src\nRUN dotnet new web -n app\nWORKDIR /src/app\nENV ASPNETCORE_URLS=http://0.0.0.0:${dockerPayload.internalPort || '3000'}\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"dotnet\", \"run\", \"--no-launch-profile\", \"--urls\", \"http://0.0.0.0:${dockerPayload.internalPort || '3000'}\"]\n`,
+                        },
+                        blank: {
+                          dockerfile: `FROM alpine:3.20\nCMD [\"sh\", \"-c\", \"echo DeployBox Blank Container && sleep infinity\"]\n`,
+                        },
+                      }[template] || {}
+                      if (templateFiles.dockerfile) {
+                        await api.put(`/projects/${created.id}/file`, { path: 'Dockerfile', content: templateFiles.dockerfile }, { headers: authHeaders })
+                      }
+                      if (template === 'node' && templateFiles.app) {
+                        await api.put(`/projects/${created.id}/file`, { path: 'app.js', content: templateFiles.app }, { headers: authHeaders })
+                        await api.put(`/projects/${created.id}/file`, { path: 'package.json', content: templateFiles.packageJson }, { headers: authHeaders })
+                      }
+                      if (template === 'php' && templateFiles.app) {
+                        await api.put(`/projects/${created.id}/file`, { path: 'index.php', content: templateFiles.app }, { headers: authHeaders })
+                      }
+                      if (template === 'python' && templateFiles.app) {
+                        await api.put(`/projects/${created.id}/file`, { path: 'app.py', content: templateFiles.app }, { headers: authHeaders })
+                      }
+                      if (template === 'nginx' && templateFiles.app) {
+                        await api.put(`/projects/${created.id}/file`, { path: 'index.html', content: templateFiles.app }, { headers: authHeaders })
+                      }
+                    }
                     if (dockerPayload.mode === 'deploy') {
+                      let dockerfileForDeploy = ''
+                      try {
+                        const fetchPath = String(dockerPayload.dockerfilePath || './Dockerfile').replace(/^\.\//, '') || 'Dockerfile'
+                        const { data: fileResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: fetchPath } })
+                        dockerfileForDeploy = String(fileResp?.content || '')
+                      } catch (_) {}
+                      if (!dockerfileForDeploy.trim()) {
+                        const { data: fallbackResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: 'Dockerfile' } })
+                        dockerfileForDeploy = String(fallbackResp?.content || '')
+                      }
                       await api.post(
                         `/projects/${created.id}/docker/run-dockerfile`,
                         {
-                          dockerfile: `FROM node:20-alpine\nWORKDIR /app\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"node\", \"app.js\"]\n`,
+                          dockerfile: dockerfileForDeploy,
                           port: String(dockerPayload.externalPort || '3000'),
                           containerPort: String(dockerPayload.internalPort || '3000'),
                         },

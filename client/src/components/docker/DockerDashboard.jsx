@@ -80,10 +80,7 @@ export default function DockerDashboard({ project, authHeaders, onSaved, t }) {
       {tab === 'logs' && <div className="card p-4"><pre className="max-h-[320px] overflow-auto rounded-lg border border-panel-border bg-slate-950 p-3 text-xs">{logsOutput || 'sem logs'}</pre></div>}
 
       <div className="card flex flex-wrap gap-2 p-3">
-        <button className="btn border-panel-accent text-panel-accent" disabled={saving || !!actionLoading} onClick={() => saveConfig(config)}>Salvar</button>
-        <button className="btn" disabled={!!actionLoading} onClick={() => handleBuild(config)}>{t('docker.actions.build', 'Build')}</button>
-        <button className="btn" disabled={!!actionLoading} onClick={() => handleStop()}>{t('docker.actions.stop', 'Stop')}</button>
-        <button className="btn" disabled={!!actionLoading} onClick={() => handleRestart()}>{t('docker.actions.restart', 'Restart')}</button>
+        <button className="btn border-panel-accent text-panel-accent" disabled={saving || !!actionLoading} onClick={() => saveConfig(config)}>Salvar configurações</button>
       </div>
     </div>
   )

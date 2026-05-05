@@ -17,13 +17,13 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
-    name: '', slug: '', description: '', template: 'node',
+    name: 'Meu Projeto Docker', slug: '', description: 'Container gerenciado pelo DeployBox', template: 'node',
     sourceType: 'template', repository: '', branch: '', subPath: '/', dockerfilePath: './Dockerfile',
     buildContext: '.', buildArgs: [{ key: '', value: '' }],
     externalPort: '3000', internalPort: '3000', restartPolicy: 'unless-stopped', cpuLimit: '', memoryMb: '',
     envs: [{ key: '', value: '', secret: false }],
     volumes: [{ hostPath: '', containerPath: '' }],
-    subdomain: '', domainBase: '', enableSSL: true, forceHTTPS: true,
+    subdomain: 'app', domainBase: 'wrodrigues.dev.br', enableSSL: true, forceHTTPS: true,
     autoDeploy: false,
   })
 
@@ -158,8 +158,12 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
         <button className="btn" onClick={onCancel}>{t('action_close', 'Fechar')}</button>
         <button className="btn" disabled={step === 0} onClick={() => setStep((s) => Math.max(0, s - 1))}>{t('action_back', 'Voltar')}</button>
         <button className="btn" disabled={step === steps.length - 1} onClick={() => setStep((s) => Math.min(steps.length - 1, s + 1))}>{t('action_next', 'Próximo')}</button>
-        <button className="btn border-panel-accent text-panel-accent" disabled={loading || busy} onClick={() => submit('create')}>{busy ? '...' : t('action_create_project', 'Criar projeto')}</button>
-        <button className="btn border-emerald-500 text-emerald-300" disabled={loading || busy} onClick={() => submit('deploy')}>{busy ? '...' : t('docker.actions.deploy', 'Deploy')}</button>
+        {step === steps.length - 1 && (
+          <>
+            <button className="btn border-panel-accent text-panel-accent" disabled={loading || busy} onClick={() => submit('create')}>{busy ? '...' : t('action_create_project', 'Criar projeto')}</button>
+            <button className="btn border-emerald-500 text-emerald-300" disabled={loading || busy} onClick={() => submit('deploy')}>{busy ? '...' : t('docker.actions.deploy', 'Criar e Deploy')}</button>
+          </>
+        )}
       </div>
       {!!error && <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</div>}
     </div>
