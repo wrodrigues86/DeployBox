@@ -1,6 +1,6 @@
-# NodePanel
+﻿# DeployBox
 
-Painel administrativo para hospedar multiplos projetos Node.js (API e Worker) em um unico servidor, com isolamento por projeto.
+Painel administrativo para hospedar multiplos projetos Node.js (API, App, Worker e Docker) em um unico servidor, com isolamento por projeto.
 
 ## Stack
 
