@@ -1,9 +1,7 @@
 name: Deploy VPS
 
 on:
-  push:
-    branches:
-      - main   # se seu repo for master, troca aqui
+  workflow_dispatch
 
 jobs:
   deploy:
