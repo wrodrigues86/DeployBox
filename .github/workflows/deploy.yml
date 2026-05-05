@@ -1,46 +1,18 @@
-name: Deploy VPS
+- name: Build do projeto
+  run: |
+    npm install
+    npm run build -w client
 
-on:
-  workflow_dispatch
+- name: Debug build
+  run: |
+    ls -la
+    ls -la client/dist
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout do código
-        uses: actions/checkout@v4
-
-      - name: Build do projeto
-        run: |
-          npm install
-          npm run build
-
-      - name: Enviar arquivos via SCP
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          source: "dist/*"   # ou build/* dependendo do seu projeto
-          target: "/home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br"
-
-      - name: Executar pós-deploy
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br
-
-            echo "📦 Instalando dependências..."
-            npm install --omit=dev
-
-            echo "🔧 Rebuild sqlite..."
-            npm rebuild better-sqlite3 || true
-
-            echo "🚀 Reiniciando..."
-            pm2 restart nodepanel || pm2 start ecosystem.config.js
-
-            pm2 save
+- name: Enviar arquivos via SCP
+  uses: appleboy/scp-action@v0.1.7
+  with:
+    host: ${{ secrets.SSH_HOST }}
+    username: ${{ secrets.SSH_USER }}
+    key: ${{ secrets.SSH_KEY }}
+    source: "client/dist/*"
+    target: "/home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br"
