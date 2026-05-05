@@ -15,19 +15,30 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            echo "Entrando no projeto..."
+            set -e
 
+            echo "📁 Entrando no projeto..."
             cd /home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br
 
-            echo "Atualizando código..."
-            git pull origin main
+            echo "🔄 Garantindo acesso ao git..."
+            git config --global --add safe.directory $(pwd)
 
-            echo "Instalando dependências..."
+            echo "📥 Atualizando código..."
+            git fetch --all
+            git reset --hard origin/main
+
+            echo "📦 Instalando dependências limpas..."
+            rm -rf node_modules package-lock.json
             npm install
 
-            echo "Rebuild (caso tenha binários tipo sqlite)..."
-            npm rebuild || true
+            echo "🔧 Rebuild nativo (sqlite etc)..."
+            npm rebuild better-sqlite3 || true
 
-            echo "Reiniciando aplicação..."
-            pm2 reload nodepanel || pm2 start ecosystem.config.js
-            # teste
+            echo "🚀 Reiniciando aplicação..."
+            pm2 delete nodepanel || true
+            pm2 start ecosystem.config.js
+
+            echo "💾 Salvando estado do PM2..."
+            pm2 save
+
+            echo "✅ Deploy finalizado"
