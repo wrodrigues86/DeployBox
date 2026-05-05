@@ -1,18 +1,66 @@
-- name: Build do projeto
-  run: |
-    npm install
-    npm run build -w client
+name: Deploy VPS
 
-- name: Debug build
-  run: |
-    ls -la
-    ls -la client/dist
+on:
+  workflow_dispatch
 
-- name: Enviar arquivos via SCP
-  uses: appleboy/scp-action@v0.1.7
-  with:
-    host: ${{ secrets.SSH_HOST }}
-    username: ${{ secrets.SSH_USER }}
-    key: ${{ secrets.SSH_KEY }}
-    source: "client/dist/*"
-    target: "/home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br"
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Instalar e buildar
+        run: |
+          npm install
+          npm run build
+
+      - name: Preparar pacote de deploy
+        run: |
+          rm -rf deploy
+          mkdir -p deploy
+
+          cp package.json deploy/
+          cp package-lock.json deploy/ || true
+          cp ecosystem.config.js deploy/ || true
+
+          cp -r server deploy/server
+          cp -r client/dist deploy/client-dist
+
+          echo "Arquivos que serão enviados:"
+          find deploy -maxdepth 3 -type f | head -100
+
+      - name: Enviar arquivos para VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "deploy/*"
+          target: "/home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br"
+          strip_components: 1
+
+      - name: Pós-deploy na VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+
+            cd /home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br
+
+            echo "Instalando dependências de produção..."
+            npm install --omit=dev
+
+            echo "Rebuild better-sqlite3..."
+            npm rebuild better-sqlite3 || true
+
+            echo "Reiniciando PM2..."
+            pm2 delete nodepanel || true
+            pm2 start ecosystem.config.js
+            pm2 save
+
+            echo "Deploy finalizado"
