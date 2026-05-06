@@ -8,59 +8,85 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar código
+      # 1. Baixar código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Instalar e buildar
+      # 2. Instalar e buildar
+      - name: Build
         run: |
           npm install
           npm run build
 
-      - name: Preparar pacote de deploy
+      # 3. Preparar pacote de deploy
+      - name: Preparar arquivos
         run: |
           rm -rf deploy
-          mkdir -p deploy
+          mkdir deploy
+
+          cp -r server deploy/
+          cp -r client deploy/
 
           cp package.json deploy/
           cp package-lock.json deploy/ || true
           cp ecosystem.config.js deploy/ || true
 
-          cp -r server deploy/server
-          cp -r client/dist deploy/client-dist
+          echo "📦 Conteúdo do deploy:"
+          ls -la deploy
+          ls -la deploy/client
 
-          echo "Arquivos que serão enviados:"
-          find deploy -maxdepth 3 -type f | head -100
-
-      - name: Enviar arquivos para VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          source: "deploy/*"
-          target: "/home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br"
-          strip_components: 1
-
-      - name: Pós-deploy na VPS
+      # 4. Limpar servidor (IMPORTANTE)
+      - name: Limpar servidor
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            set -e
+            cd htdocs/console.wrodrigues.dev.br || exit 1
 
-            cd /home/dev-console-wrodrigues/htdocs/console.wrodrigues.dev.br
+            echo "📁 Pasta atual:"
+            pwd
+            ls -la
 
-            echo "Instalando dependências de produção..."
+            echo "🧹 Limpando projeto..."
+            rm -rf node_modules
+            rm -rf server
+            rm -rf client
+
+            echo "📁 Após limpeza:"
+            ls -la
+
+      # 5. Enviar arquivos
+      - name: Upload via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "deploy/*"
+          target: "htdocs/console.wrodrigues.dev.br"
+          strip_components: 1
+
+      # 6. Instalar e subir app
+      - name: Finalizar deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd htdocs/console.wrodrigues.dev.br || exit 1
+
+            echo "📦 Instalando dependências..."
             npm install --omit=dev
 
-            echo "Rebuild better-sqlite3..."
+            echo "🔧 Rebuild sqlite..."
             npm rebuild better-sqlite3 || true
 
-            echo "Reiniciando PM2..."
+            echo "🚀 Reiniciando aplicação..."
             pm2 delete nodepanel || true
             pm2 start ecosystem.config.js
             pm2 save
 
-            echo "Deploy finalizado"
+            echo "✅ Deploy finalizado"
