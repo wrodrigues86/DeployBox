@@ -20,28 +20,41 @@ jobs:
           npm install
           npm run build
 
-      # 3. Preparar pasta de produção
+      # 3. Validar build
+      - name: Verificar build
+        run: |
+          echo "📁 Verificando build..."
+          ls -la client
+          ls -la client/dist || (echo "❌ dist NÃO foi gerado" && exit 1)
+
+      # 4. Preparar pasta de produção
       - name: Preparar build final
         run: |
           rm -rf production
-          mkdir production
+          mkdir -p production/client
 
           cp -r server production/
-          cp -r client/dist production/client
+          cp -r client/dist production/client/dist
 
           cp package.json production/
           cp package-lock.json production/ || true
           cp ecosystem.config.js production/ || true
 
-      # 4. Publicar na branch producao
+          echo "📦 Conteúdo do build:"
+          ls -la production
+          ls -la production/client
+          ls -la production/client/dist
+
+      # 5. Publicar na branch producao (SEMPRE LIMPA)
       - name: Publicar branch producao
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./production
           publish_branch: producao
+          force_orphan: true
 
-      # 5. Limpar servidor
+      # 6. Limpar servidor
       - name: Limpar servidor
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -50,9 +63,17 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd htdocs/console.wrodrigues.dev.br || exit 1
-            rm -rf node_modules server client
 
-      # 6. Enviar arquivos
+            echo "📁 Pasta atual:"
+            pwd
+            ls -la
+
+            echo "🧹 Limpando projeto..."
+            rm -rf node_modules
+            rm -rf server
+            rm -rf client
+
+      # 7. Enviar arquivos
       - name: Upload
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -63,7 +84,7 @@ jobs:
           target: "htdocs/console.wrodrigues.dev.br"
           strip_components: 1
 
-      # 7. Subir app
+      # 8. Subir aplicação
       - name: Start
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -73,9 +94,15 @@ jobs:
           script: |
             cd htdocs/console.wrodrigues.dev.br || exit 1
 
+            echo "📦 Instalando dependências..."
             npm install --omit=dev
+
+            echo "🔧 Rebuild sqlite..."
             npm rebuild better-sqlite3 || true
 
+            echo "🚀 Reiniciando aplicação..."
             pm2 delete nodepanel || true
             pm2 start ecosystem.config.js
             pm2 save
+
+            echo "✅ Deploy finalizado"
