@@ -75,6 +75,7 @@ jobs:
             rm -rf node_modules
             rm -rf server
             rm -rf client
+			rm package-lock.json
 
       # 7. Enviar arquivos
       - name: Upload
@@ -98,14 +99,15 @@ jobs:
             cd htdocs/console.wrodrigues.dev.br || exit 1
 
             echo "📦 Instalando dependências..."
-            npm install --omit=dev
+            npm install
 
             echo "🔧 Rebuild sqlite..."
             npm rebuild better-sqlite3 || true
 
             echo "🚀 Reiniciando aplicação..."
             pm2 delete nodepanel || true
-            pm2 start ecosystem.config.js
+            pm2 start ecosystem.config.cjs
             pm2 save
+			pm2 startup
 
             echo "✅ Deploy finalizado"
