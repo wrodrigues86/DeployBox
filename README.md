@@ -1,4 +1,4 @@
-﻿# DeployBox v1.0.0 
+﻿# DeployBox v1.0.0  
 
 Painel administrativo para hospedar multiplos projetos Node.js (API, App, Worker e Docker) em um unico servidor, com isolamento por projeto.
 
