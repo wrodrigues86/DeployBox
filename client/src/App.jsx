@@ -1812,7 +1812,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
 
   function defaultFileForProject(type, files = []) {
     const candidates = type === 'docker'
-      ? ['Dockerfile', 'docker-compose.yml', 'app.js', 'index.js']
+      ? ['Dockerfile', 'Dockerfile', 'app.js', 'index.js']
       : ['index.js']
     for (const candidate of candidates) {
       if (files.some((f) => f.path === candidate)) return candidate
@@ -2725,7 +2725,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
               <ul className="list-disc space-y-1 pl-5 text-slate-300">
                 <li>O arquivo principal deve ser <code>index.js</code>.</li>
                 <li>Para API, exporte <code>routes</code>; para Worker, exporte <code>run</code>; para App, exporte <code>handle</code> (ou use <code>public/</code>).</li>
-                <li>Para Docker, inclua <code>Dockerfile</code>, <code>docker-compose.yml</code> e <code>app.js</code>.</li>
+                <li>Para Docker, inclua <code>Dockerfile</code>, <code>Dockerfile</code> e <code>app.js</code>.</li>
                 <li>Não envie caminhos inválidos (ex.: <code>../</code>).</li>
                 <li>Após upload, o DeployBox aplica os arquivos, versiona <code>index.js</code> e reinicia o projeto.</li>
               </ul>
