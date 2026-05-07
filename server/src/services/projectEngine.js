@@ -408,7 +408,7 @@ async function runDockerCompose(project, args = '', extraEnv = {}) {
   try {
     return await runCommand(`docker compose ${args}`.trim(), cwd, composeEnv);
   } catch (error) {
-    return runCommand(`docker-compose ${args}`.trim(), cwd, composeEnv);
+    return runCommand(`docker compose ${args}`.trim(), cwd, composeEnv);
   }
 }
 
