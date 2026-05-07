@@ -646,7 +646,7 @@ versions
 
 1. Edite o \`app.js\`.
 2. Ajuste variáveis no \`.env\`.
-3. Para subir manualmente: \`docker compose up -d --build\`.
+3. Para subir manualmente: \docker run -d\`.
 4. No NodePanel, crie um projeto do tipo Docker para gerenciamento automático.
 `,
       ),
