@@ -102,7 +102,6 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
   const [error, setError] = useState('')
   const [form, setForm] = useState({
     name: 'meu-app',
-    slug: 'meu-app',
     description: 'Aplicacao publicada com DeployBox',
     repository: '',
     branch: 'main',
@@ -137,13 +136,11 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
   }, [search])
 
   function applyTemplate(item) {
-    const nextSlug = slugify(item.name)
     setSelectedTemplate(item.template)
     setSelectedTemplateName(item.name)
     setForm((prev) => ({
       ...prev,
       name: item.name,
-      slug: nextSlug || prev.slug,
       description: item.description,
       internalPort: item.internalPort,
     }))
@@ -229,11 +226,10 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
     setError('')
     if (!form.name.trim()) return setError('Informe o nome da aplicacao.')
     if (!form.repository.trim()) return setError('Informe o repositorio GitHub.')
-    if (!form.slug.trim()) return setError('Informe o nome da aplicacao.')
 
     const payload = {
       name: form.name.trim(),
-      slug: slugify(form.slug || form.name),
+      slug: slugify(form.name),
       description: form.description.trim() || 'Aplicacao publicada com DeployBox',
       template: selectedTemplate,
       sourceType: 'github',
@@ -406,7 +402,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
               value={form.name}
               onChange={(e) => {
                 const nextName = e.target.value
-                setForm((prev) => ({ ...prev, name: nextName, slug: slugify(nextName) || prev.slug }))
+                setForm((prev) => ({ ...prev, name: nextName }))
               }}
               placeholder="meu-app"
             />
@@ -424,8 +420,8 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
             <div className="mt-1 text-base font-semibold text-slate-100">{selectedTemplateName}</div>
           </div>
           <div className="rounded-xl border border-slate-700 bg-slate-950/60 p-4">
-            <div className="text-xs uppercase tracking-wide text-slate-400">Slug</div>
-            <div className="mt-1 font-mono text-sm text-slate-200">{slugify(form.slug || form.name) || 'meu-app'}</div>
+            <div className="text-xs uppercase tracking-wide text-slate-400">Endereço da aplicação</div>
+            <div className="mt-1 text-sm text-slate-200">Gerado automaticamente a partir do nome</div>
           </div>
         </div>
       </SectionCard>

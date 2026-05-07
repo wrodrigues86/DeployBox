@@ -1413,12 +1413,28 @@ function Card({ title, value }) {
 
 function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated }) {
   async function handleDockerCreate(dockerPayload) {
-    const created = await onCreate({
-      name: dockerPayload.name,
-      slug: dockerPayload.slug,
-      description: dockerPayload.description,
-      type: 'docker',
-    })
+    const baseSlug = String(dockerPayload.slug || '').trim()
+    const baseName = String(dockerPayload.name || '').trim() || 'Aplicação'
+    let created = null
+    let lastError = null
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const nextSlug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`
+      const nextName = attempt === 0 ? baseName : `${baseName} ${attempt + 1}`
+      try {
+        created = await onCreate({
+          name: nextName,
+          slug: nextSlug,
+          description: dockerPayload.description,
+          type: 'docker',
+        })
+        break
+      } catch (err) {
+        const msg = String(err?.response?.data?.error || err?.message || '')
+        lastError = err
+        if (!msg.includes('slug_ja_existe')) throw err
+      }
+    }
+    if (!created) throw lastError || new Error('Falha ao criar projeto.')
     if (!created?.id) return
     const envPairs = [
       ['DOCKER_HOST_PORT', String(dockerPayload.externalPort || '3000')],
@@ -1598,12 +1614,28 @@ function ProjectList({
   }
 
   async function handleDockerCreate(dockerPayload) {
-    const created = await onCreate({
-      name: dockerPayload.name,
-      slug: dockerPayload.slug,
-      description: dockerPayload.description,
-      type: 'docker',
-    })
+    const baseSlug = String(dockerPayload.slug || '').trim()
+    const baseName = String(dockerPayload.name || '').trim() || 'Aplicação'
+    let created = null
+    let lastError = null
+    for (let attempt = 0; attempt < 20; attempt += 1) {
+      const nextSlug = attempt === 0 ? baseSlug : `${baseSlug}-${attempt + 1}`
+      const nextName = attempt === 0 ? baseName : `${baseName} ${attempt + 1}`
+      try {
+        created = await onCreate({
+          name: nextName,
+          slug: nextSlug,
+          description: dockerPayload.description,
+          type: 'docker',
+        })
+        break
+      } catch (err) {
+        const msg = String(err?.response?.data?.error || err?.message || '')
+        lastError = err
+        if (!msg.includes('slug_ja_existe')) throw err
+      }
+    }
+    if (!created) throw lastError || new Error('Falha ao criar projeto.')
     if (!created?.id) return
     const envPairs = [
       ['DOCKER_HOST_PORT', String(dockerPayload.externalPort || '3000')],
