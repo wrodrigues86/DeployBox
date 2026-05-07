@@ -406,9 +406,9 @@ async function runDockerCompose(project, args = '', extraEnv = {}) {
   const cwd = projectPath(project.slug);
   const composeEnv = { PROJECT_SLUG: safeSlug(project.slug), ...extraEnv };
   try {
-    return await runCommand(`docker compose ${args}`.trim(), cwd, composeEnv);
+    return await runCommand(`${args}`.trim(), cwd, composeEnv);
   } catch (error) {
-    return runCommand(`docker compose ${args}`.trim(), cwd, composeEnv);
+    return runCommand(`${args}`.trim(), cwd, composeEnv);
   }
 }
 
@@ -441,7 +441,7 @@ export async function startDockerProject(project) {
     HOST_PORT: env.HOST_PORT || env.PORT || '',
   });
   setProjectStatus(project.id, 'running');
-  addLog(project.id, 'info', 'Container Docker iniciado (docker compose up -d --build)');
+  addLog(project.id, 'Container Docker iniciado (docker compose up -d --build');
 }
 
 export async function stopDockerProject(project, removeVolumes = false) {
@@ -451,7 +451,7 @@ export async function stopDockerProject(project, removeVolumes = false) {
   const cwd = projectPath(project.slug);
   try {
     await runDockerCompose(project, downArgs);
-    addLog(project.id, 'info', `Container Docker parado (docker compose ${downArgs})`);
+    addLog(project.id, 'info', `Container Docker parado (docker ${downArgs})`);
   } catch (error) {
     addLog(project.id, 'warning', `Falha ao parar container Docker: ${error.message}`);
   }
