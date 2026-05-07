@@ -111,6 +111,20 @@ export function initMainDatabase() {
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS app_templates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      category TEXT DEFAULT '',
+      description TEXT DEFAULT '',
+      icon_data_url TEXT DEFAULT '',
+      source_type TEXT NOT NULL DEFAULT 'git' CHECK(source_type IN ('git', 'compose')),
+      git_url TEXT DEFAULT '',
+      compose_text TEXT DEFAULT '',
+      active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_logs_project_created ON logs(project_id, created_at DESC);
   `);
 

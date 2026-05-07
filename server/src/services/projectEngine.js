@@ -86,14 +86,14 @@ CMD ["npm", "start"]
 const DEFAULT_DOCKER_COMPOSE = `services:
   app:
     build: .
-    container_name: deploybox-\${PROJECT_SLUG}
+    container_name: deploybox-\${PROJECT_SLUG:-app}
     restart: unless-stopped
     env_file:
       - .env
     environment:
-      - PORT=3000
+      - PORT=\${DOCKER_CONTAINER_PORT:-3000}
     ports:
-      - "\${HOST_PORT:-3000}:3000"
+      - "\${DOCKER_HOST_PORT:-3000}:\${DOCKER_CONTAINER_PORT:-3000}"
 `;
 
 const DEFAULT_DOCKERIGNORE = `node_modules
@@ -402,18 +402,34 @@ function dockerContainerName(project) {
   return `deploybox-${safeSlug(project.slug)}`;
 }
 
+function normalizeDockerComposeFile(project) {
+  const composePath = path.join(projectPath(project.slug), 'docker-compose.yml');
+  if (!fs.existsSync(composePath)) return;
+  const raw = fs.readFileSync(composePath, 'utf8');
+  let next = raw;
+  next = next.replace('container_name: deploybox-${PROJECT_SLUG}', 'container_name: deploybox-${PROJECT_SLUG:-app}');
+  next = next.replace('container_name: deploybox-${PROJECT_SLUG:-app:-app}', 'container_name: deploybox-${PROJECT_SLUG:-app}');
+  next = next.replace('- PORT=3000', '- PORT=${DOCKER_CONTAINER_PORT:-3000}');
+  next = next.replace('"${HOST_PORT:-3000}:3000"', '"${DOCKER_HOST_PORT:-3000}:${DOCKER_CONTAINER_PORT:-3000}"');
+  if (next !== raw) fs.writeFileSync(composePath, next, 'utf8');
+}
+
 async function runDockerCompose(project, args = '', extraEnv = {}) {
   const cwd = projectPath(project.slug);
   const composeEnv = { PROJECT_SLUG: safeSlug(project.slug), ...extraEnv };
+  const dockerCli = resolveDockerCliPath();
+  const command = `"${dockerCli}" compose ${String(args || '').trim()}`.trim();
+  const legacyCommand = `docker-compose ${String(args || '').trim()}`.trim();
   try {
-    return await runCommand(`${args}`.trim(), cwd, composeEnv);
+    return await runCommand(command, cwd, composeEnv);
   } catch (error) {
-    return runCommand(`${args}`.trim(), cwd, composeEnv);
+    return runCommand(legacyCommand, cwd, composeEnv);
   }
 }
 
 export async function startDockerProject(project) {
   ensureProjectFiles(project);
+  normalizeDockerComposeFile(project);
   const env = loadEnv(project.id, project.slug);
   const dockerCli = resolveDockerCliPath();
   const cwd = projectPath(project.slug);
@@ -438,10 +454,10 @@ export async function startDockerProject(project) {
   }
 
   await runDockerCompose(project, 'up -d --build', {
-    HOST_PORT: env.HOST_PORT || env.PORT || '',
+    HOST_PORT: env.DOCKER_HOST_PORT || env.HOST_PORT || env.PORT || '',
   });
   setProjectStatus(project.id, 'running');
-  addLog(project.id, 'Container Docker iniciado (docker compose up -d --build');
+  addLog(project.id, 'info', 'Container Docker iniciado (docker compose up -d --build)');
 }
 
 export async function stopDockerProject(project, removeVolumes = false) {

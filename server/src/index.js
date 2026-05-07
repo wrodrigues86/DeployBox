@@ -153,6 +153,22 @@ function sanitizeProject(project) {
   };
 }
 
+function sanitizeAppTemplate(row) {
+  return {
+    id: row.id,
+    name: String(row.name || ''),
+    category: String(row.category || ''),
+    description: String(row.description || ''),
+    iconDataUrl: String(row.icon_data_url || ''),
+    sourceType: String(row.source_type || 'git'),
+    gitUrl: String(row.git_url || ''),
+    composeText: String(row.compose_text || ''),
+    active: !!row.active,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 function getProjectById(id) {
   return db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
 }
@@ -1102,6 +1118,78 @@ app.put('/api/translations', (req, res) => {
   return res.json({ ok: true, locale, translations: getTranslationsFromDb(locale) });
 });
 
+app.get('/api/app-templates', (req, res) => {
+  const rows = db.prepare('SELECT * FROM app_templates WHERE active = 1 ORDER BY id DESC').all();
+  return res.json(rows.map(sanitizeAppTemplate));
+});
+
+app.get('/api/settings/app-templates', (req, res) => {
+  if (!assertFullAdmin(req, res)) return;
+  const rows = db.prepare('SELECT * FROM app_templates ORDER BY id DESC').all();
+  return res.json(rows.map(sanitizeAppTemplate));
+});
+
+app.post('/api/settings/app-templates', (req, res) => {
+  if (!assertFullAdmin(req, res)) return;
+  const body = req.body || {};
+  const name = String(body.name || '').trim();
+  const category = String(body.category || '').trim();
+  const description = String(body.description || '').trim();
+  const iconDataUrl = String(body.iconDataUrl || '').trim();
+  const sourceType = String(body.sourceType || 'git').trim().toLowerCase();
+  const gitUrl = String(body.gitUrl || '').trim();
+  const composeText = String(body.composeText || '');
+  const active = body.active === undefined ? true : !!body.active;
+  if (!name) return res.status(400).json({ error: 'template_name_required' });
+  if (!['git', 'compose'].includes(sourceType)) return res.status(400).json({ error: 'template_source_type_invalid' });
+  if (sourceType === 'git' && !gitUrl) return res.status(400).json({ error: 'template_git_url_required' });
+  if (sourceType === 'compose' && !composeText.trim()) return res.status(400).json({ error: 'template_compose_required' });
+
+  const info = db.prepare(
+    `INSERT INTO app_templates
+      (name, category, description, icon_data_url, source_type, git_url, compose_text, active, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(name, category, description, iconDataUrl, sourceType, gitUrl, composeText, active ? 1 : 0, nowIso(), nowIso());
+  const created = db.prepare('SELECT * FROM app_templates WHERE id = ?').get(info.lastInsertRowid);
+  return res.status(201).json(sanitizeAppTemplate(created));
+});
+
+app.put('/api/settings/app-templates/:id', (req, res) => {
+  if (!assertFullAdmin(req, res)) return;
+  const id = Number(req.params.id);
+  const current = db.prepare('SELECT * FROM app_templates WHERE id = ?').get(id);
+  if (!current) return res.status(404).json({ error: 'template_not_found' });
+  const body = req.body || {};
+  const next = {
+    name: body.name === undefined ? String(current.name || '') : String(body.name || '').trim(),
+    category: body.category === undefined ? String(current.category || '') : String(body.category || '').trim(),
+    description: body.description === undefined ? String(current.description || '') : String(body.description || '').trim(),
+    iconDataUrl: body.iconDataUrl === undefined ? String(current.icon_data_url || '') : String(body.iconDataUrl || '').trim(),
+    sourceType: body.sourceType === undefined ? String(current.source_type || 'git') : String(body.sourceType || '').trim().toLowerCase(),
+    gitUrl: body.gitUrl === undefined ? String(current.git_url || '') : String(body.gitUrl || '').trim(),
+    composeText: body.composeText === undefined ? String(current.compose_text || '') : String(body.composeText || ''),
+    active: body.active === undefined ? !!current.active : !!body.active,
+  };
+  if (!next.name) return res.status(400).json({ error: 'template_name_required' });
+  if (!['git', 'compose'].includes(next.sourceType)) return res.status(400).json({ error: 'template_source_type_invalid' });
+  if (next.sourceType === 'git' && !next.gitUrl) return res.status(400).json({ error: 'template_git_url_required' });
+  if (next.sourceType === 'compose' && !next.composeText.trim()) return res.status(400).json({ error: 'template_compose_required' });
+  db.prepare(
+    `UPDATE app_templates
+      SET name = ?, category = ?, description = ?, icon_data_url = ?, source_type = ?, git_url = ?, compose_text = ?, active = ?, updated_at = ?
+      WHERE id = ?`,
+  ).run(next.name, next.category, next.description, next.iconDataUrl, next.sourceType, next.gitUrl, next.composeText, next.active ? 1 : 0, nowIso(), id);
+  const updated = db.prepare('SELECT * FROM app_templates WHERE id = ?').get(id);
+  return res.json(sanitizeAppTemplate(updated));
+});
+
+app.delete('/api/settings/app-templates/:id', (req, res) => {
+  if (!assertFullAdmin(req, res)) return;
+  const id = Number(req.params.id);
+  db.prepare('DELETE FROM app_templates WHERE id = ?').run(id);
+  return res.json({ ok: true });
+});
+
 app.get('/api/templates/project-zip', (req, res) => {
   const requestedType = String(req.query.type || 'api').toLowerCase();
   const type = ['worker', 'app', 'docker'].includes(requestedType) ? requestedType : 'api';
@@ -1285,7 +1373,14 @@ app.post('/api/projects', async (req, res) => {
     writeProjectCode(project, code);
     db.prepare('INSERT OR IGNORE INTO project_env (project_id, env_key, env_value, is_secret) VALUES (?, ?, ?, 0)').run(project.id, 'APP_NAME', project.name);
     persistEnvFile(project);
-    await bootProjectRuntime(project);
+    // Don't auto-start on creation. Deploy/start should be explicit to avoid immediate error state.
+    if (project.active) {
+      try {
+        await bootProjectRuntime(project);
+      } catch (_) {
+        db.prepare('UPDATE projects SET status = ?, updated_at = ? WHERE id = ?').run('stopped', nowIso(), project.id);
+      }
+    }
 
     return res.status(201).json(sanitizeProject(getProjectById(project.id)));
   } catch (error) {
@@ -1912,23 +2007,27 @@ app.get('/api/projects/:id/env', (req, res) => {
 });
 
 app.post('/api/projects/:id/env', (req, res) => {
-  const project = getProjectById(Number(req.params.id));
-  if (!project) return res.status(404).json({ error: 'Projeto não encontrado' });
-  if (!assertProjectAccess(req, res, project.id)) return;
+  try {
+    const project = getProjectById(Number(req.params.id));
+    if (!project) return res.status(404).json({ error: 'Projeto não encontrado' });
+    if (!assertProjectAccess(req, res, project.id)) return;
 
-  const { envKey, envValue, isSecret } = req.body || {};
-  if (!envKey) return res.status(400).json({ error: 'envKey obrigatório' });
+    const { envKey, envValue, isSecret } = req.body || {};
+    if (!envKey) return res.status(400).json({ error: 'envKey obrigatório' });
 
-  db.prepare(
-    `INSERT INTO project_env (project_id, env_key, env_value, is_secret, updated_at)
-     VALUES (?, ?, ?, ?, ?)
-     ON CONFLICT(project_id, env_key)
-     DO UPDATE SET env_value = excluded.env_value, is_secret = excluded.is_secret, updated_at = excluded.updated_at`,
-  ).run(project.id, envKey, String(envValue ?? ''), isSecret ? 1 : 0, nowIso());
+    db.prepare(
+      `INSERT INTO project_env (project_id, env_key, env_value, is_secret, updated_at)
+       VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(project_id, env_key)
+       DO UPDATE SET env_value = excluded.env_value, is_secret = excluded.is_secret, updated_at = excluded.updated_at`,
+    ).run(project.id, envKey, String(envValue ?? ''), isSecret ? 1 : 0, nowIso());
 
-  persistEnvFile(project);
-  addLog(project.id, 'info', `Variável atualizada: ${envKey}`);
-  res.json({ ok: true });
+    persistEnvFile(project);
+    addLog(project.id, 'info', `Variável atualizada: ${envKey}`);
+    return res.json({ ok: true });
+  } catch (error) {
+    return res.status(400).json({ error: error?.message || 'env_update_failed' });
+  }
 });
 
 app.delete('/api/projects/:id/env/:key', (req, res) => {

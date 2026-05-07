@@ -22,70 +22,71 @@ const DEFAULT_TRANSLATIONS = {
   menu_projects: 'Projetos',
   menu_sql: 'SQL',
   menu_logs: 'Logs',
-  menu_settings: 'Configurações',
+  menu_settings: 'Configuraï¿½ï¿½es',
   logout: 'Sair',
-  logged_user_prefix: 'Usuário',
-  tab_code: 'Código',
-  tab_env: 'Variáveis',
+  logged_user_prefix: 'Usuï¿½rio',
+  tab_code: 'Cï¿½digo',
+  tab_env: 'Variï¿½veis',
   tab_db_sql: 'Banco SQL',
-  tab_deps: 'Dependências',
-  tab_security: 'Segurança',
+  tab_deps: 'Dependï¿½ncias',
+  tab_security: 'Seguranï¿½a',
   tab_logs: 'Logs',
-  tab_versions: 'Versões',
+  tab_versions: 'Versï¿½es',
   tab_monitor: 'Monitoramento',
   back_to_list: 'Voltar para lista',
-  save_code: 'Salvar Código',
-  settings_title: 'Configurações da Aplicação',
-  settings_users_title: 'Usuários e Permissões',
-  settings_menu_app: 'Configurações da Aplicação',
-  settings_menu_users: 'Usuários e Permissões',
-  settings_menu_translations: 'Traduções',
-  settings_menu_health: 'Saúde do Sistema',
-  settings_scope_hint: 'Essas configurações são do DeployBox (globais), não do projeto selecionado.',
+  save_code: 'Salvar Cï¿½digo',
+  settings_title: 'Configuraï¿½ï¿½es da Aplicaï¿½ï¿½o',
+  settings_users_title: 'Usuï¿½rios e Permissï¿½es',
+  settings_menu_app: '',
+  settings_menu_templates: 'Templates de Aplicacao',
+  settings_menu_users: 'Usuï¿½rios e Permissï¿½es',
+  settings_menu_translations: 'Traduï¿½ï¿½es',
+  settings_menu_health: 'Saï¿½de do Sistema',
+  settings_scope_hint: 'Essas configuraï¿½ï¿½es sï¿½o do DeployBox (globais), nï¿½o do projeto selecionado.',
   settings_base_url_label: 'URL base da API principal',
-  settings_default_rate_limit_label: 'Rate limit padrão para novos projetos',
-  settings_refresh_sec_label: 'Intervalo padrão de refresh (segundos)',
-  settings_system_version_label: 'Versão do sistema',
+  settings_default_rate_limit_label: 'Rate limit padrï¿½o para novos projetos',
+  settings_refresh_sec_label: 'Intervalo padrï¿½o de refresh (segundos)',
+  settings_system_version_label: 'Versï¿½o do sistema',
   settings_stop_all: 'Parar todos projetos',
   settings_start_all: 'Iniciar todos projetos',
   settings_restore_initial: 'Restaurar sistema',
-  settings_restore_initial_confirm: 'Isso vai apagar projetos, usuários e configurações. Continuar?',
-  settings_restore_initial_done: 'Sistema restaurado. Refaça o setup inicial.',
-  settings_save_button: 'Salvar Configurações',
-  settings_saved_ok: 'Configurações globais salvas.',
-  settings_health_title: 'Saúde do Sistema',
-  settings_health_hint: 'Verificação global do backend da aplicação.',
+  settings_restore_initial_confirm: 'Isso vai apagar projetos, usuï¿½rios e configuraï¿½ï¿½es. Continuar?',
+  settings_restore_initial_done: 'Sistema restaurado. Refaï¿½a o setup inicial.',
+  settings_save_button: 'Salvar Configuraï¿½ï¿½es',
+  settings_saved_ok: 'Configuraï¿½ï¿½es globais salvas.',
+  settings_health_title: 'Saï¿½de do Sistema',
+  settings_health_hint: 'Verificaï¿½ï¿½o global do backend da aplicaï¿½ï¿½o.',
   settings_health_test: 'Testar /api/health',
   settings_health_none: 'Nenhum teste executado.',
   settings_health_online_prefix: 'Backend online',
   settings_health_fail_prefix: 'Falha healthcheck',
-  settings_translations_title: 'Traduções',
+  settings_translations_title: 'Traduï¿½ï¿½es',
   settings_translations_hint: 'Edite o JSON em /translations/pt-BR.json (somente full_admin).',
-  settings_translations_save: 'Salvar Traduções',
+  settings_translations_save: 'Salvar Traduï¿½ï¿½es',
   settings_translations_locale_label: 'Idioma/Locale',
   settings_translations_new_locale_placeholder: 'novo locale ex: en-US',
   settings_translations_create_locale: 'Criar locale',
   settings_translations_create_locale_success: 'Locale criado com sucesso.',
   settings_translations_create_locale_error: 'Falha ao criar locale.',
-  settings_translations_admin_only: 'Apenas usuário full_admin pode editar traduções.',
-  settings_translations_new_title: 'Criar nova tradução',
+  settings_translations_admin_only: 'Apenas usuï¿½rio full_admin pode editar traduï¿½ï¿½es.',
+  settings_translations_new_title: 'Criar nova traduï¿½ï¿½o',
   settings_translations_key_placeholder: 'chave_exemplo',
-  settings_translations_value_placeholder: 'Texto da tradução',
+  settings_translations_value_placeholder: 'Texto da traduï¿½ï¿½o',
   settings_translations_add: 'Adicionar',
-  settings_translations_key_required: 'Informe a chave da tradução',
-  settings_translations_invalid_current_json: 'JSON atual inválido. Corrija antes de adicionar nova tradução.',
-  settings_translations_saved_ok: 'Traduções salvas com sucesso.',
-  settings_translations_invalid_json_error: 'JSON inválido para traduções',
-  settings_translations_protected_error: 'Não é permitido excluir traduções ativas do sistema.',
-  settings_users_admin_only: 'Apenas usuário full_admin pode gerenciar usuários.',
-  settings_users_list_title: 'Lista de usuários',
+  settings_translations_key_required: 'Informe a chave da traduï¿½ï¿½o',
+  settings_translations_invalid_current_json: 'JSON atual invï¿½lido. Corrija antes de adicionar nova traduï¿½ï¿½o.',
+  settings_translations_saved_ok: 'Traduï¿½ï¿½es salvas com sucesso.',
+  settings_translations_invalid_json_error: 'JSON invï¿½lido para traduï¿½ï¿½es',
+  settings_translations_protected_error: 'Nï¿½o ï¿½ permitido excluir traduï¿½ï¿½es ativas do sistema.',
+  settings_users_admin_only: 'Apenas usuï¿½rio full_admin pode gerenciar usuï¿½rios.',
+  settings_users_list_title: 'Lista de usuï¿½rios',
   settings_users_search_placeholder: 'Buscar por nome ou e-mail',
-  settings_users_none: 'Nenhum usuário cadastrado.',
-  settings_users_new: 'Novo usuário',
-  settings_users_edit: 'Edição de usuário',
-  settings_users_delete_confirm_prefix: 'Excluir usuário',
-  settings_users_save_failed: 'Falha ao salvar usuário',
-  settings_users_delete_failed: 'Falha ao excluir usuário',
+  settings_users_none: 'Nenhum usuï¿½rio cadastrado.',
+  settings_users_new: 'Novo usuï¿½rio',
+  settings_users_edit: 'Ediï¿½ï¿½o de usuï¿½rio',
+  settings_users_delete_confirm_prefix: 'Excluir usuï¿½rio',
+  settings_users_save_failed: 'Falha ao salvar usuï¿½rio',
+  settings_users_delete_failed: 'Falha ao excluir usuï¿½rio',
   settings_users_status_active: 'ativo',
   settings_users_status_inactive: 'inativo',
   settings_users_projects_label: 'projetos',
@@ -96,10 +97,10 @@ const DEFAULT_TRANSLATIONS = {
   action_open_url: 'Abrir URL',
   action_execute_test: 'Executar Teste',
   action_clone_git: 'Clonar Git',
-  clone_git_title: 'Clonar Repositório Git',
+  clone_git_title: 'Clonar Repositï¿½rio Git',
   clone_git_repo_placeholder: 'https://github.com/owner/repo.git',
-  clone_git_repo_select_placeholder: 'Selecione um repositório conectado',
-  clone_git_token_placeholder: 'Token GitHub (opcional para repositório público)',
+  clone_git_repo_select_placeholder: 'Selecione um repositï¿½rio conectado',
+  clone_git_token_placeholder: 'Token GitHub (opcional para repositï¿½rio pï¿½blico)',
   clone_git_show_manual_token: 'Usar token manual',
   clone_git_hide_manual_token: 'Ocultar token manual',
   clone_git_connect: 'Conectar GitHub',
@@ -110,20 +111,20 @@ const DEFAULT_TRANSLATIONS = {
   clone_git_save_token: 'Salvar token',
   clone_git_clear_token: 'Remover token salvo',
   clone_git_token_saved: 'Token salvo neste navegador.',
-  clone_git_token_not_saved: 'Token não salvo.',
-  clone_git_connect_hint: 'Clique em Conectar, faça login no GitHub e o token volta automaticamente para esta tela.',
+  clone_git_token_not_saved: 'Token nï¿½o salvo.',
+  clone_git_connect_hint: 'Clique em Conectar, faï¿½a login no GitHub e o token volta automaticamente para esta tela.',
   clone_git_branch_placeholder: 'Selecione uma branch',
-  clone_git_hint: 'Informe a URL do repositório, use token apenas para repositório privado, escolha a branch e clone para este projeto.',
+  clone_git_hint: 'Informe a URL do repositï¿½rio, use token apenas para repositï¿½rio privado, escolha a branch e clone para este projeto.',
   clone_git_login: 'Listar branches',
   clone_git_loading_branches: 'Carregando branches...',
-  clone_git_loading_repos: 'Carregando repositórios...',
-  clone_git_repos_error: 'Falha ao listar repositórios',
-  clone_git_no_repos: 'Nenhum repositório encontrado na conta conectada',
+  clone_git_loading_repos: 'Carregando repositï¿½rios...',
+  clone_git_repos_error: 'Falha ao listar repositï¿½rios',
+  clone_git_no_repos: 'Nenhum repositï¿½rio encontrado na conta conectada',
   clone_git_branch_required: 'Selecione uma branch',
   clone_git_no_branches: 'Nenhuma branch encontrada',
-  clone_git_submit: 'Clonar Repositório',
+  clone_git_submit: 'Clonar Repositï¿½rio',
   clone_git_submitting: 'Clonando...',
-  clone_git_repo_required: 'Informe a URL do repositório Git',
+  clone_git_repo_required: 'Informe a URL do repositï¿½rio Git',
   clone_git_branches_error: 'Falha ao listar branches',
   clone_git_error: 'Falha no clone Git',
   explorer_new_folder: 'Nova Pasta',
@@ -132,11 +133,11 @@ const DEFAULT_TRANSLATIONS = {
   explorer_prompt_file: 'Nome/caminho do novo arquivo (ex: src/utils/helper.js)',
   explorer_create_folder_error: 'Falha ao criar pasta',
   explorer_create_file_error: 'Falha ao criar arquivo',
-  setup_loading: 'Preparando instalação inicial...',
-  setup_title: 'Assistente de primeiro acesso. Siga os passos para concluir a instalação.',
+  setup_loading: 'Preparando instalaï¿½ï¿½o inicial...',
+  setup_title: 'Assistente de primeiro acesso. Siga os passos para concluir a instalaï¿½ï¿½o.',
   setup_step: 'Passo',
   setup_intro: 'Este wizard configura o administrador inicial da plataforma.',
-  action_next: 'Próximo',
+  action_next: 'Prï¿½ximo',
   action_back: 'Voltar',
   setup_admin_name_placeholder: 'Nome do admin',
   setup_admin_email_placeholder: 'E-mail do admin',
@@ -145,14 +146,14 @@ const DEFAULT_TRANSLATIONS = {
   setup_admin_label: 'Administrador',
   setup_email_label: 'E-mail',
   setup_installing: 'Instalando...',
-  setup_finish: 'Concluir Instalação',
-  setup_success: 'Instalação concluída. Faça login para continuar.',
+  setup_finish: 'Concluir Instalaï¿½ï¿½o',
+  setup_success: 'Instalaï¿½ï¿½o concluï¿½da. Faï¿½a login para continuar.',
   setup_error_required: 'Preencha nome, e-mail e senha do administrador.',
-  setup_error_password_mismatch: 'A confirmação da senha não confere.',
-  setup_error_failed: 'Falha na instalação inicial.',
+  setup_error_password_mismatch: 'A confirmaï¿½ï¿½o da senha nï¿½o confere.',
+  setup_error_failed: 'Falha na instalaï¿½ï¿½o inicial.',
   logs_all_projects: 'Todos os projetos',
   logs_clear: 'Limpar Logs',
-  login_subtitle: 'Painel administrativo para múltiplos projetos Node.js.',
+  login_subtitle: 'Painel administrativo para mï¿½ltiplos projetos Node.js.',
   label_email: 'E-mail',
   label_password: 'Senha',
   action_login: 'Entrar',
@@ -161,7 +162,7 @@ const DEFAULT_TRANSLATIONS = {
   projects_list_title: 'Lista de projetos',
   action_create_new: 'Criar novo',
   action_refresh: 'Atualizar',
-  projects_search_placeholder: 'Buscar por nome, slug ou descrição',
+  projects_search_placeholder: 'Buscar por nome, slug ou descriï¿½ï¿½o',
   label_total: 'Total',
   action_open: 'Abrir',
   action_pause: 'Pausar',
@@ -171,7 +172,7 @@ const DEFAULT_TRANSLATIONS = {
   projects_create_title: 'Criar novo projeto',
   action_close: 'Fechar',
   label_name: 'Nome',
-  label_description: 'Descrição',
+  label_description: 'Descriï¿½ï¿½o',
   action_creating: 'Criando...',
   action_create_project: 'Criar projeto',
   action_select_zip: 'Selecionar ZIP',
@@ -181,7 +182,7 @@ const DEFAULT_TRANSLATIONS = {
   label_theme: 'Tema',
   action_exit_fullscreen: 'Sair Fullscreen',
   action_fullscreen: 'Fullscreen',
-  error_invalid_json: 'JSON inválido',
+  error_invalid_json: 'JSON invï¿½lido',
   action_run_now: 'Executar Agora',
   action_save_cron: 'Salvar Cron',
   zip_help_title: 'Como subir projeto ZIP',
@@ -196,30 +197,30 @@ const DEFAULT_TRANSLATIONS = {
   action_restore: 'Restaurar',
   action_compare: 'Comparar',
   action_restart: 'Reiniciar',
-  menu_create_application: 'Criar Aplicação',
+  menu_create_application: 'Criar Aplicaï¿½ï¿½o',
 }
 
 const sidebarItems = [
   { key: 'Dashboard', labelKey: 'menu_dashboard', fallback: 'Dashboard', icon: 'DB' },
   { key: 'Projetos', labelKey: 'menu_projects', fallback: 'Projetos', icon: 'PR' },
-  { key: 'CriarAplicacao', labelKey: 'menu_create_application', fallback: 'Criar Aplicação', icon: 'CA' },
+  { key: 'CriarAplicacao', labelKey: 'menu_create_application', fallback: 'Criar Aplicaï¿½ï¿½o', icon: 'CA' },
   { key: 'SQL', labelKey: 'menu_sql', fallback: 'SQL', icon: 'SQ' },
   { key: 'Logs', labelKey: 'menu_logs', fallback: 'Logs', icon: 'LG' },
-  { key: 'Configuracoes', labelKey: 'menu_settings', fallback: 'Configurações', icon: 'CF' },
+  { key: 'Configuracoes', labelKey: 'menu_settings', fallback: 'Configuraï¿½ï¿½es', icon: 'CF' },
 ]
 const defaultTabBySection = {
   Dashboard: null,
-  Projetos: 'Código',
+  Projetos: 'Cï¿½digo',
   CriarAplicacao: null,
   SQL: null,
   Logs: null,
   Configuracoes: null,
 }
 const settingsSidebarSubmenus = [
-  { key: 'app', labelKey: 'settings_menu_app', fallback: 'Configurações da Aplicação' },
-  { key: 'users', labelKey: 'settings_menu_users', fallback: 'Usuários e Permissões' },
-  { key: 'translations', labelKey: 'settings_menu_translations', fallback: 'Traduções' },
-  { key: 'health', labelKey: 'settings_menu_health', fallback: 'Saúde do Sistema' },
+    { key: 'templates', labelKey: 'settings_menu_templates', fallback: 'Templates de Aplicacao' },
+  { key: 'users', labelKey: 'settings_menu_users', fallback: 'Usuï¿½rios e Permissï¿½es' },
+  { key: 'translations', labelKey: 'settings_menu_translations', fallback: 'Traduï¿½ï¿½es' },
+  { key: 'health', labelKey: 'settings_menu_health', fallback: 'Saï¿½de do Sistema' },
 ]
 
 function cronPresetToExpr(preset, time, custom) {
@@ -236,20 +237,20 @@ function cronPresetToExpr(preset, time, custom) {
 function tabsForProjectType(type, t) {
   if (type === 'docker') {
     return [
-      { key: 'Código', label: t('tab_code', 'Código') },
-      { key: 'Variáveis', label: t('tab_env', 'Variáveis') },
+      { key: 'Cï¿½digo', label: t('tab_code', 'Cï¿½digo') },
+      { key: 'Variï¿½veis', label: t('tab_env', 'Variï¿½veis') },
       { key: 'Logs', label: t('tab_logs', 'Logs') },
       { key: 'Monitoramento', label: t('tab_monitor', 'Monitoramento') },
     ]
   }
   return [
-    { key: 'Código', label: t('tab_code', 'Código') },
-    { key: 'Variáveis', label: t('tab_env', 'Variáveis') },
+    { key: 'Cï¿½digo', label: t('tab_code', 'Cï¿½digo') },
+    { key: 'Variï¿½veis', label: t('tab_env', 'Variï¿½veis') },
     { key: 'Banco SQL', label: t('tab_db_sql', 'Banco SQL') },
-    { key: 'Dependências', label: t('tab_deps', 'Dependências') },
-    { key: 'Segurança', label: t('tab_security', 'Segurança') },
+    { key: 'Dependï¿½ncias', label: t('tab_deps', 'Dependï¿½ncias') },
+    { key: 'Seguranï¿½a', label: t('tab_security', 'Seguranï¿½a') },
     { key: 'Logs', label: t('tab_logs', 'Logs') },
-    { key: 'Versões', label: t('tab_versions', 'Versões') },
+    { key: 'Versï¿½es', label: t('tab_versions', 'Versï¿½es') },
     { key: 'Monitoramento', label: t('tab_monitor', 'Monitoramento') },
   ]
 }
@@ -261,7 +262,7 @@ export default function App() {
   const [projects, setProjects] = useState([])
   const [selected, setSelected] = useState(null)
   const [projectDetailOpen, setProjectDetailOpen] = useState(false)
-  const [tab, setTab] = useState('Código')
+  const [tab, setTab] = useState('Cï¿½digo')
   const [settingsSubmenu, setSettingsSubmenu] = useState('app')
   const [me, setMe] = useState(null)
   const [translations, setTranslations] = useState(DEFAULT_TRANSLATIONS)
@@ -356,7 +357,7 @@ export default function App() {
         const isMutation = ['post', 'put', 'patch', 'delete'].includes(method)
         if (isMutation && !skip && !url.includes('/login')) {
           const fromApi = typeof response?.data?.message === 'string' ? response.data.message : ''
-          notifyUi(fromApi || 'Alteração salva com sucesso.', 'success')
+          notifyUi(fromApi || 'Alteraï¿½ï¿½o salva com sucesso.', 'success')
         }
         return response
       },
@@ -366,7 +367,7 @@ export default function App() {
         const skip = !!error?.config?.skipNotify
         const isMutation = ['post', 'put', 'patch', 'delete'].includes(method)
         if (isMutation && !skip && !url.includes('/login')) {
-          const message = error?.response?.data?.error || error?.message || 'Falha ao salvar alteração.'
+          const message = error?.response?.data?.error || error?.message || 'Falha ao salvar alteraï¿½ï¿½o.'
           notifyUi(message, 'error')
         }
         return Promise.reject(error)
@@ -398,7 +399,7 @@ export default function App() {
   useEffect(() => {
     if (!selected) return
     const allowed = tabsForProjectType(selected.type, t).map((item) => item.key)
-    if (!allowed.includes(tab)) setTab('Código')
+    if (!allowed.includes(tab)) setTab('Cï¿½digo')
   }, [selected?.id, selected?.type, tab])
 
   function handleSection(nextSection) {
@@ -426,7 +427,7 @@ export default function App() {
             <div className="w-full text-center">
               <img src={deployBoxLogo} alt="DeployBox" className="mx-auto mb-2 h-auto w-[140px]" />
               <div className="text-xs text-slate-400">Admin Console</div>
-              {me?.name && <div className="mt-1 text-xs text-slate-300">{t('logged_user_prefix', 'Usuário')}: {me.name}</div>}
+              {me?.name && <div className="mt-1 text-xs text-slate-300">{t('logged_user_prefix', 'Usuï¿½rio')}: {me.name}</div>}
             </div>
           ) : (
             <img src={deployBoxLogo} alt="DeployBox" className="mx-auto h-auto w-10 rounded-md border border-panel-border p-1" />
@@ -549,6 +550,7 @@ export default function App() {
             loading={loading}
             t={t}
             onCreated={() => refreshProjects()}
+            onDone={() => setSection('Projetos')}
             onCreate={async (payload) => {
               setLoading(true)
               try {
@@ -571,7 +573,7 @@ export default function App() {
                 t={t}
                 onSelect={(project) => {
                   setSelected(project)
-                  setTab('Código')
+                  setTab('Cï¿½digo')
                   setProjectDetailOpen(true)
                 }}
                 onRefresh={() => refreshProjects()}
@@ -599,13 +601,13 @@ export default function App() {
             ) : (
               <div className="card p-5 lg:p-6">
                 {!selected ? (
-                  <div className="rounded-lg border border-panel-border bg-slate-950/20 p-6">Projeto não encontrado. Volte para a lista.</div>
+                  <div className="rounded-lg border border-panel-border bg-slate-950/20 p-6">Projeto nï¿½o encontrado. Volte para a lista.</div>
                 ) : (
                   <>
                     <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-panel-border pb-3">
                       <div>
                         <div className="text-lg font-semibold">{selected.name}</div>
-                        <div className="text-xs text-slate-400">/{selected.slug} • {selected.type}</div>
+                        <div className="text-xs text-slate-400">/{selected.slug} ï¿½ {selected.type}</div>
                       </div>
                       <button className="btn" onClick={() => setProjectDetailOpen(false)}>{t('back_to_list', 'Voltar para lista')}</button>
                     </div>
@@ -618,13 +620,13 @@ export default function App() {
                       ))}
                     </div>
 
-                    {tab === 'Código' && <CodeTab t={t} project={selected} authHeaders={authHeaders} onSaved={() => refreshProjects(selected.id)} />}
-                    {tab === 'Variáveis' && <EnvTab t={t} project={selected} authHeaders={authHeaders} />}
+                    {tab === 'Cï¿½digo' && <CodeTab t={t} project={selected} authHeaders={authHeaders} onSaved={() => refreshProjects(selected.id)} />}
+                    {tab === 'Variï¿½veis' && <EnvTab t={t} project={selected} authHeaders={authHeaders} />}
                     {tab === 'Banco SQL' && <SqlTab t={t} project={selected} authHeaders={authHeaders} />}
-                    {tab === 'Dependências' && <DepsTab t={t} project={selected} authHeaders={authHeaders} />}
-                    {tab === 'Segurança' && <SecurityTab t={t} project={selected} authHeaders={authHeaders} onSaved={() => refreshProjects(selected.id)} />}
+                    {tab === 'Dependï¿½ncias' && <DepsTab t={t} project={selected} authHeaders={authHeaders} />}
+                    {tab === 'Seguranï¿½a' && <SecurityTab t={t} project={selected} authHeaders={authHeaders} onSaved={() => refreshProjects(selected.id)} />}
                     {tab === 'Logs' && <LogsTab t={t} project={selected} authHeaders={authHeaders} />}
-                    {tab === 'Versões' && <VersionsTab t={t} project={selected} authHeaders={authHeaders} onRestored={() => refreshProjects(selected.id)} />}
+                    {tab === 'Versï¿½es' && <VersionsTab t={t} project={selected} authHeaders={authHeaders} onRestored={() => refreshProjects(selected.id)} />}
                     {tab === 'Monitoramento' && <MonitorTab t={t} project={selected} authHeaders={authHeaders} onRefreshProject={() => refreshProjects(selected.id)} />}
                   </>
                 )}
@@ -661,7 +663,7 @@ function DashboardSection({ dashboard, projects, t }) {
                 <td>/{p.slug}</td>
                 <td>{p.type}</td>
                 <td>{p.status}</td>
-                <td>{p.active ? 'sim' : 'não'}</td>
+                <td>{p.active ? 'sim' : 'nï¿½o'}</td>
                 <td>{typeof p.sizeMB === 'number' ? `${p.sizeMB.toFixed(2)} MB` : '-'}</td>
               </tr>
             ))}
@@ -686,6 +688,9 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
   const [newTranslationValue, setNewTranslationValue] = useState('')
   const [newLocale, setNewLocale] = useState('')
   const [users, setUsers] = useState([])
+  const [appTemplates, setAppTemplates] = useState([])
+  const [templateSaving, setTemplateSaving] = useState(false)
+  const [templateForm, setTemplateForm] = useState({ name: '', category: '', description: '', sourceType: 'git', gitUrl: '', composeText: '', iconDataUrl: '' })
   const [editingId, setEditingId] = useState(null)
   const [userDetailOpen, setUserDetailOpen] = useState(false)
   const [userSearch, setUserSearch] = useState('')
@@ -695,8 +700,8 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
     localStorage.setItem('nodepanel_app_base_url', baseUrl)
     localStorage.setItem('nodepanel_default_rate_limit', String(defaultRateLimit))
     localStorage.setItem('nodepanel_refresh_sec', String(autoRefreshSec))
-    setHealthStatus(t('settings_saved_ok', 'Configurações globais salvas.'))
-    notifyUi(t('settings_saved_ok', 'Configurações globais salvas.'), 'success')
+    setHealthStatus(t('settings_saved_ok', 'Configuraï¿½ï¿½es globais salvas.'))
+    notifyUi(t('settings_saved_ok', 'Configuraï¿½ï¿½es globais salvas.'), 'success')
   }
 
   async function loadUsers() {
@@ -705,8 +710,18 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
     setUsers(data)
   }
 
+  async function loadAppTemplates() {
+    if (me?.role !== 'full_admin') return
+    const { data } = await api.get('/settings/app-templates', { headers: authHeaders })
+    setAppTemplates(Array.isArray(data) ? data : [])
+  }
+
   useEffect(() => {
     loadUsers().catch(() => {})
+  }, [me?.role])
+
+  useEffect(() => {
+    loadAppTemplates().catch(() => {})
   }, [me?.role])
 
   useEffect(() => {
@@ -731,9 +746,9 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
     <div className="mt-4 space-y-4">
         {activeSettingsTab === 'app' && (
           <div className="card p-4">
-            <h2 className="mb-3 text-lg font-semibold">{t('settings_title', 'Configurações da Aplicação')}</h2>
+            <h2 className="mb-3 text-lg font-semibold">{t('settings_title', 'Configuraï¿½ï¿½es da Aplicaï¿½ï¿½o')}</h2>
             <p className="mb-4 text-sm text-slate-400">
-              {t('settings_scope_hint', 'Essas configurações são do DeployBox (globais), não do projeto selecionado.')}
+              {t('settings_scope_hint', 'Essas configuraï¿½ï¿½es sï¿½o do DeployBox (globais), nï¿½o do projeto selecionado.')}
             </p>
             <div className="space-y-3">
               <div>
@@ -741,15 +756,15 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                 <input className="input" value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-400">{t('settings_default_rate_limit_label', 'Rate limit padrão para novos projetos')}</label>
+                <label className="mb-1 block text-xs text-slate-400">{t('settings_default_rate_limit_label', 'Rate limit padrï¿½o para novos projetos')}</label>
                 <input className="input" type="number" value={defaultRateLimit} onChange={(e) => setDefaultRateLimit(e.target.value)} />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-400">{t('settings_refresh_sec_label', 'Intervalo padrão de refresh (segundos)')}</label>
+                <label className="mb-1 block text-xs text-slate-400">{t('settings_refresh_sec_label', 'Intervalo padrï¿½o de refresh (segundos)')}</label>
                 <input className="input" type="number" value={autoRefreshSec} onChange={(e) => setAutoRefreshSec(e.target.value)} />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-slate-400">{t('settings_system_version_label', 'Versão do sistema')}</label>
+                <label className="mb-1 block text-xs text-slate-400">{t('settings_system_version_label', 'Versï¿½o do sistema')}</label>
                 <div className="rounded-lg border border-panel-border bg-slate-950/40 px-3 py-2 text-sm text-slate-200">
                   {systemVersion || '1.0.0'}
                 </div>
@@ -787,11 +802,11 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
               <button
                 className="btn border-red-500 text-red-300 hover:border-red-400"
                 onClick={async () => {
-                  if (!confirm(t('settings_restore_initial_confirm', 'Isso vai apagar projetos, usuários e configurações. Continuar?'))) return
+                  if (!confirm(t('settings_restore_initial_confirm', 'Isso vai apagar projetos, usuï¿½rios e configuraï¿½ï¿½es. Continuar?'))) return
                   try {
                     await api.post('/system/restore-initial', {}, { headers: authHeaders })
                     localStorage.removeItem('nodepanel_token')
-                    notifyUi(t('settings_restore_initial_done', 'Sistema restaurado. Refaça o setup inicial.'), 'success')
+                    notifyUi(t('settings_restore_initial_done', 'Sistema restaurado. Refaï¿½a o setup inicial.'), 'success')
                     window.location.reload()
                   } catch (err) {
                     setHealthStatus(err?.response?.data?.error || 'Falha ao restaurar sistema.')
@@ -800,15 +815,15 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
               >
                 {t('settings_restore_initial', 'Restaurar sistema')}
               </button>
-              <button className="btn border-panel-accent text-panel-accent" onClick={save}>{t('settings_save_button', 'Salvar Configurações')}</button>
+              <button className="btn border-panel-accent text-panel-accent" onClick={save}>{t('settings_save_button', 'Salvar Configuraï¿½ï¿½es')}</button>
             </div>
           </div>
         )}
 
         {activeSettingsTab === 'health' && (
           <div className="card p-4">
-            <h3 className="mb-3 text-lg font-semibold">{t('settings_health_title', 'Saúde do Sistema')}</h3>
-            <p className="mb-4 text-sm text-slate-400">{t('settings_health_hint', 'Verificação global do backend da aplicação.')}</p>
+            <h3 className="mb-3 text-lg font-semibold">{t('settings_health_title', 'Saï¿½de do Sistema')}</h3>
+            <p className="mb-4 text-sm text-slate-400">{t('settings_health_hint', 'Verificaï¿½ï¿½o global do backend da aplicaï¿½ï¿½o.')}</p>
             <button
               className="btn"
               onClick={async () => {
@@ -828,10 +843,96 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
           </div>
         )}
 
+        {activeSettingsTab === 'templates' && (
+          <div className="card p-4">
+            <h3 className="mb-3 text-lg font-semibold">Templates de Aplicacao</h3>
+            {me?.role !== 'full_admin' ? (
+              <div className="rounded-lg border border-panel-border bg-slate-950/40 p-3 text-sm text-slate-300">
+                Apenas usuario full_admin pode gerenciar templates.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="grid gap-2 md:grid-cols-2">
+                  <input className="input" placeholder="Nome do app" value={templateForm.name} onChange={(e) => setTemplateForm((p) => ({ ...p, name: e.target.value }))} />
+                  <input className="input" placeholder="Categoria (opcional)" value={templateForm.category} onChange={(e) => setTemplateForm((p) => ({ ...p, category: e.target.value }))} />
+                </div>
+                <textarea className="input min-h-[80px]" placeholder="Descricao curta" value={templateForm.description} onChange={(e) => setTemplateForm((p) => ({ ...p, description: e.target.value }))} />
+                <div className="grid gap-2 md:grid-cols-[200px,1fr]">
+                  <select className="input" value={templateForm.sourceType} onChange={(e) => setTemplateForm((p) => ({ ...p, sourceType: e.target.value }))}>
+                    <option value="git">Repositorio Git</option>
+                    <option value="compose">Docker Compose (textarea)</option>
+                  </select>
+                  <input className="input" placeholder="https://github.com/user/repo.git" value={templateForm.gitUrl} onChange={(e) => setTemplateForm((p) => ({ ...p, gitUrl: e.target.value }))} />
+                </div>
+                {templateForm.sourceType === 'compose' && (
+                  <textarea className="input min-h-[160px] font-mono text-xs" placeholder="services:\n  app:\n    image: nginx:alpine" value={templateForm.composeText} onChange={(e) => setTemplateForm((p) => ({ ...p, composeText: e.target.value }))} />
+                )}
+                <div>
+                  <label className="mb-1 block text-xs text-slate-400">Imagem do app</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="input"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (!file) return
+                      const reader = new FileReader()
+                      reader.onload = () => setTemplateForm((p) => ({ ...p, iconDataUrl: String(reader.result || '') }))
+                      reader.readAsDataURL(file)
+                    }}
+                  />
+                </div>
+                <button
+                  className="btn border-panel-accent text-panel-accent"
+                  disabled={templateSaving}
+                  onClick={async () => {
+                    setTemplateSaving(true)
+                    try {
+                      await api.post('/settings/app-templates', templateForm, { headers: authHeaders })
+                      setTemplateForm({ name: '', category: '', description: '', sourceType: 'git', gitUrl: '', composeText: '', iconDataUrl: '' })
+                      await loadAppTemplates()
+                      notifyUi('Template criado com sucesso.', 'success')
+                    } catch (err) {
+                      notifyUi(err?.response?.data?.error || 'Falha ao criar template.', 'error')
+                    } finally {
+                      setTemplateSaving(false)
+                    }
+                  }}
+                >
+                  {templateSaving ? 'Salvando...' : 'Salvar template'}
+                </button>
+                <div className="rounded-lg border border-panel-border bg-slate-950/30 p-3">
+                  <div className="mb-2 text-sm font-semibold">Templates cadastrados</div>
+                  <div className="space-y-2">
+                    {appTemplates.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between gap-3 rounded-md border border-panel-border px-3 py-2">
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium">{item.name}</div>
+                          <div className="text-xs text-slate-400">{item.sourceType === 'compose' ? 'Compose' : item.gitUrl}</div>
+                        </div>
+                        <button
+                          className="btn px-2 py-1 text-xs text-red-300 border-red-500/50"
+                          onClick={async () => {
+                            await api.delete(`/settings/app-templates/${item.id}`, { headers: authHeaders })
+                            await loadAppTemplates()
+                          }}
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    ))}
+                    {!appTemplates.length ? <div className="text-xs text-slate-400">Nenhum template cadastrado.</div> : null}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {activeSettingsTab === 'translations' && (
           <div className="card p-4">
-            <h3 className="mb-3 text-lg font-semibold">{t('settings_translations_title', 'Traduções')}</h3>
-            <p className="mb-3 text-sm text-slate-400">{t('settings_translations_hint', 'Edite o JSON de textos da aplicação (somente full_admin).')}</p>
+            <h3 className="mb-3 text-lg font-semibold">{t('settings_translations_title', 'Traduï¿½ï¿½es')}</h3>
+            <p className="mb-3 text-sm text-slate-400">{t('settings_translations_hint', 'Edite o JSON de textos da aplicaï¿½ï¿½o (somente full_admin).')}</p>
             <div className="mb-3 grid gap-2 md:grid-cols-[220px,1fr,140px]">
               <div>
                 <label className="mb-1 block text-xs text-slate-400">{t('settings_translations_locale_label', 'Idioma/Locale')}</label>
@@ -874,12 +975,12 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
             </div>
             {me?.role !== 'full_admin' ? (
               <div className="rounded-lg border border-panel-border bg-slate-950/40 p-3 text-sm text-slate-300">
-                {t('settings_translations_admin_only', 'Apenas usuário full_admin pode editar traduções.')}
+                {t('settings_translations_admin_only', 'Apenas usuï¿½rio full_admin pode editar traduï¿½ï¿½es.')}
               </div>
             ) : (
               <div className="space-y-3">
                 <div className="rounded-lg border border-panel-border bg-slate-950/30 p-3">
-                  <div className="mb-2 text-xs text-slate-300">{t('settings_translations_new_title', 'Criar nova tradução')}</div>
+                  <div className="mb-2 text-xs text-slate-300">{t('settings_translations_new_title', 'Criar nova traduï¿½ï¿½o')}</div>
                   <div className="grid gap-2 md:grid-cols-[1fr,1fr,160px]">
                     <input
                       className="input"
@@ -889,7 +990,7 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                     />
                     <input
                       className="input"
-                      placeholder={t('settings_translations_value_placeholder', 'Texto da tradução')}
+                      placeholder={t('settings_translations_value_placeholder', 'Texto da traduï¿½ï¿½o')}
                       value={newTranslationValue}
                       onChange={(e) => setNewTranslationValue(e.target.value)}
                     />
@@ -898,7 +999,7 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                       onClick={() => {
                         const key = newTranslationKey.trim()
                         if (!key) {
-                          notifyUi(t('settings_translations_key_required', 'Informe a chave da tradução'), 'error')
+                          notifyUi(t('settings_translations_key_required', 'Informe a chave da traduï¿½ï¿½o'), 'error')
                           return
                         }
                         try {
@@ -908,7 +1009,7 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                           setNewTranslationKey('')
                           setNewTranslationValue('')
                         } catch {
-                          notifyUi(t('settings_translations_invalid_current_json', 'JSON atual inválido. Corrija antes de adicionar nova tradução.'), 'error')
+                          notifyUi(t('settings_translations_invalid_current_json', 'JSON atual invï¿½lido. Corrija antes de adicionar nova traduï¿½ï¿½o.'), 'error')
                         }
                       }}
                     >
@@ -929,19 +1030,19 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                       const protectedKeys = Object.keys(DEFAULT_TRANSLATIONS)
                       const removedProtected = protectedKeys.filter((k) => !(k in parsed))
                       if (removedProtected.length) {
-                        notifyUi(t('settings_translations_protected_error', 'Não é permitido excluir traduções ativas do sistema.'), 'error')
+                        notifyUi(t('settings_translations_protected_error', 'Nï¿½o ï¿½ permitido excluir traduï¿½ï¿½es ativas do sistema.'), 'error')
                         return
                       }
                       const { data } = await api.put('/translations', { locale: translationLocale, translations: parsed }, { headers: authHeaders })
                       onTranslationsUpdated?.(data.translations || parsed)
                       await onChangeTranslationLocale?.(data.locale || translationLocale || 'pt-BR')
-                      setHealthStatus(t('settings_translations_saved_ok', 'Traduções salvas com sucesso.'))
+                      setHealthStatus(t('settings_translations_saved_ok', 'Traduï¿½ï¿½es salvas com sucesso.'))
                     } catch (err) {
-                      notifyUi(err?.response?.data?.error || t('settings_translations_invalid_json_error', 'JSON inválido para traduções'), 'error')
+                      notifyUi(err?.response?.data?.error || t('settings_translations_invalid_json_error', 'JSON invï¿½lido para traduï¿½ï¿½es'), 'error')
                     }
                   }}
                 >
-                  {t('settings_translations_save', 'Salvar Traduções')}
+                  {t('settings_translations_save', 'Salvar Traduï¿½ï¿½es')}
                 </button>
               </div>
             )}
@@ -952,17 +1053,17 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
           <>
             {me?.role !== 'full_admin' ? (
               <div className="card p-4">
-                <h3 className="mb-3 text-lg font-semibold">{t('settings_users_title', 'Usuários e Permissões')}</h3>
+                <h3 className="mb-3 text-lg font-semibold">{t('settings_users_title', 'Usuï¿½rios e Permissï¿½es')}</h3>
                 <div className="rounded-lg border border-panel-border bg-slate-950/40 p-3 text-sm text-slate-300">
-                  {t('settings_users_admin_only', 'Apenas usuário full_admin pode gerenciar usuários.')}
+                  {t('settings_users_admin_only', 'Apenas usuï¿½rio full_admin pode gerenciar usuï¿½rios.')}
                 </div>
               </div>
             ) : !userDetailOpen ? (
               <div className="card p-4">
-                <h3 className="mb-3 text-lg font-semibold">{t('settings_users_title', 'Usuários e Permissões')}</h3>
+                <h3 className="mb-3 text-lg font-semibold">{t('settings_users_title', 'Usuï¿½rios e Permissï¿½es')}</h3>
                 <div className="rounded-lg border border-panel-border bg-slate-950/30 p-3">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <div className="text-sm font-semibold">{t('settings_users_list_title', 'Lista de usuários')}</div>
+                    <div className="text-sm font-semibold">{t('settings_users_list_title', 'Lista de usuï¿½rios')}</div>
                     <div className="flex gap-2">
                       <button
                         className="btn border-panel-accent text-panel-accent"
@@ -1008,7 +1109,7 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                               <div className="truncate font-medium underline underline-offset-2">{u.name}</div>
                               <div className="mt-1 text-xs text-slate-400">{u.email}</div>
                               <div className="mt-1 text-[11px] uppercase tracking-wide text-slate-500">
-                                {u.role} • {u.active ? t('settings_users_status_active', 'ativo') : t('settings_users_status_inactive', 'inativo')} • {t('settings_users_projects_label', 'projetos')}: {u.projectIds?.length || 0}
+                                {u.role} ï¿½ {u.active ? t('settings_users_status_active', 'ativo') : t('settings_users_status_inactive', 'inativo')} ï¿½ {t('settings_users_projects_label', 'projetos')}: {u.projectIds?.length || 0}
                               </div>
                               {u.storageLimitMB ? (
                                 <div className="mt-1 text-[11px] text-slate-500">{t('settings_users_storage_limit_display', 'limite')}: {u.storageLimitMB} MB</div>
@@ -1028,13 +1129,13 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                               <button
                                 className="btn border-red-500 px-2 py-1 text-xs text-red-300"
                                 onClick={async () => {
-                                  if (!confirm(`${t('settings_users_delete_confirm_prefix', 'Excluir usuário')} ${u.name}?`)) return
+                                  if (!confirm(`${t('settings_users_delete_confirm_prefix', 'Excluir usuï¿½rio')} ${u.name}?`)) return
                                   try {
                                     await api.delete(`/users/${u.id}`, { headers: authHeaders })
                                     if (editingId === u.id) resetUserForm()
                                     await loadUsers()
                                   } catch (err) {
-                                    notifyUi(err?.response?.data?.error || t('settings_users_delete_failed', 'Falha ao excluir usuário'), 'error')
+                                    notifyUi(err?.response?.data?.error || t('settings_users_delete_failed', 'Falha ao excluir usuï¿½rio'), 'error')
                                   }
                                 }}
                               >
@@ -1044,14 +1145,14 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                           </div>
                         </div>
                       ))}
-                    {!users.length && <div className="text-sm text-slate-400">{t('settings_users_none', 'Nenhum usuário cadastrado.')}</div>}
+                    {!users.length && <div className="text-sm text-slate-400">{t('settings_users_none', 'Nenhum usuï¿½rio cadastrado.')}</div>}
                   </div>
                 </div>
               </div>
             ) : (
               <div className="card p-4">
                 <div className="mb-3 flex items-center justify-between gap-2">
-                  <h3 className="text-lg font-semibold">{editingId ? t('settings_users_edit', 'Edição de usuário') : t('settings_users_new', 'Novo usuário')}</h3>
+                  <h3 className="text-lg font-semibold">{editingId ? t('settings_users_edit', 'Ediï¿½ï¿½o de usuï¿½rio') : t('settings_users_new', 'Novo usuï¿½rio')}</h3>
                   <button className="btn px-2 py-1 text-xs" onClick={resetUserForm}>{t('settings_users_back_to_list', 'Voltar para lista')}</button>
                 </div>
                 <div className="space-y-2">
@@ -1112,11 +1213,11 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                           resetUserForm()
                           await loadUsers()
                         } catch (err) {
-                          notifyUi(err?.response?.data?.error || t('settings_users_save_failed', 'Falha ao salvar usuário'), 'error')
+                          notifyUi(err?.response?.data?.error || t('settings_users_save_failed', 'Falha ao salvar usuï¿½rio'), 'error')
                         }
                       }}
                     >
-                      {editingId ? 'Salvar alterações' : 'Criar usuário'}
+                      {editingId ? 'Salvar alteraï¿½ï¿½es' : 'Criar usuï¿½rio'}
                     </button>
                     <button className="btn" onClick={resetUserForm}>Cancelar</button>
                   </div>
@@ -1135,13 +1236,13 @@ function AppSqlSection({ authHeaders, t }) {
   const examples = [
     { label: 'Listar tabelas', sql: "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;" },
     { label: 'Projetos recentes', sql: 'SELECT id, name, slug, type, status, created_at FROM projects ORDER BY id DESC LIMIT 20;' },
-    { label: 'Variáveis por projeto', sql: 'SELECT project_id, COUNT(*) AS total_env FROM project_env GROUP BY project_id ORDER BY total_env DESC;' },
-    { label: 'Últimos logs', sql: 'SELECT id, project_id, level, message, created_at FROM logs ORDER BY id DESC LIMIT 50;' },
+    { label: 'Variï¿½veis por projeto', sql: 'SELECT project_id, COUNT(*) AS total_env FROM project_env GROUP BY project_id ORDER BY total_env DESC;' },
+    { label: 'ï¿½ltimos logs', sql: 'SELECT id, project_id, level, message, created_at FROM logs ORDER BY id DESC LIMIT 50;' },
   ]
 
   return (
     <div className="mt-4 card p-4">
-      <h2 className="mb-2 text-lg font-semibold">SQL Global da Aplicação</h2>
+      <h2 className="mb-2 text-lg font-semibold">SQL Global da Aplicaï¿½ï¿½o</h2>
       <p className="mb-3 text-sm text-slate-400">Executa comandos no SQLite principal do DeployBox.</p>
       <div className="mb-3 flex flex-wrap gap-2">
         {examples.map((ex) => (
@@ -1285,7 +1386,7 @@ function Login({ onLogin, t }) {
       return
     }
     if (setupForm.adminPassword !== setupForm.adminPasswordConfirm) {
-      setError(t('setup_error_password_mismatch', 'A confirmação da senha não confere.'))
+      setError(t('setup_error_password_mismatch', 'A confirmaï¿½ï¿½o da senha nï¿½o confere.'))
       return
     }
     setSetupLoading(true)
@@ -1298,9 +1399,9 @@ function Login({ onLogin, t }) {
       setSetupRequired(false)
       setEmail(setupForm.adminEmail.trim())
       setPassword(setupForm.adminPassword)
-      notifyUi(t('setup_success', 'Instalação concluída. Faça login para continuar.'), 'success')
+      notifyUi(t('setup_success', 'Instalaï¿½ï¿½o concluï¿½da. Faï¿½a login para continuar.'), 'success')
     } catch (err) {
-      setError(err?.response?.data?.error || t('setup_error_failed', 'Falha na instalação inicial.'))
+      setError(err?.response?.data?.error || t('setup_error_failed', 'Falha na instalaï¿½ï¿½o inicial.'))
     } finally {
       setSetupLoading(false)
     }
@@ -1309,7 +1410,7 @@ function Login({ onLogin, t }) {
   if (checkingSetup) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 p-4">
-        <div className="card w-full max-w-md p-6 text-sm text-slate-300">{t('setup_loading', 'Preparando instalação inicial...')}</div>
+        <div className="card w-full max-w-md p-6 text-sm text-slate-300">{t('setup_loading', 'Preparando instalaï¿½ï¿½o inicial...')}</div>
       </div>
     )
   }
@@ -1319,7 +1420,7 @@ function Login({ onLogin, t }) {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 p-4">
         <div className="card w-full max-w-xl space-y-4 p-6">
           <h1 className="text-2xl font-bold text-panel-accent">{t('app_title', 'DeployBox')}</h1>
-          <p className="text-sm text-slate-300">{t('setup_title', 'Assistente de primeiro acesso. Siga os passos para concluir a instalação.')}</p>
+          <p className="text-sm text-slate-300">{t('setup_title', 'Assistente de primeiro acesso. Siga os passos para concluir a instalaï¿½ï¿½o.')}</p>
 
           <div className="flex items-center gap-2 text-xs">
             {[1, 2, 3].map((n) => (
@@ -1334,7 +1435,7 @@ function Login({ onLogin, t }) {
               <div className="rounded-lg border border-panel-border bg-slate-950/30 p-3">
                 {t('setup_intro', 'Este wizard configura o administrador inicial da plataforma.')}
               </div>
-              <button className="btn border-panel-accent text-panel-accent" onClick={() => setSetupStep(2)}>{t('action_next', 'Próximo')}</button>
+              <button className="btn border-panel-accent text-panel-accent" onClick={() => setSetupStep(2)}>{t('action_next', 'Prï¿½ximo')}</button>
             </div>
           )}
 
@@ -1346,7 +1447,7 @@ function Login({ onLogin, t }) {
               <input className="input" type="password" placeholder={t('setup_admin_password_confirm_placeholder', 'Confirmar senha')} value={setupForm.adminPasswordConfirm} onChange={(e) => setSetupForm({ ...setupForm, adminPasswordConfirm: e.target.value })} />
               <div className="flex gap-2">
                 <button className="btn" onClick={() => setSetupStep(1)}>{t('action_back', 'Voltar')}</button>
-                <button className="btn border-panel-accent text-panel-accent" onClick={() => setSetupStep(3)}>{t('action_next', 'Próximo')}</button>
+                <button className="btn border-panel-accent text-panel-accent" onClick={() => setSetupStep(3)}>{t('action_next', 'Prï¿½ximo')}</button>
               </div>
             </div>
           )}
@@ -1360,7 +1461,7 @@ function Login({ onLogin, t }) {
               <div className="flex gap-2">
                 <button className="btn" onClick={() => setSetupStep(2)}>{t('action_back', 'Voltar')}</button>
                 <button className="btn border-panel-accent text-panel-accent" onClick={runSetup} disabled={setupLoading}>
-                  {setupLoading ? t('setup_installing', 'Instalando...') : t('setup_finish', 'Concluir Instalação')}
+                  {setupLoading ? t('setup_installing', 'Instalando...') : t('setup_finish', 'Concluir Instalaï¿½ï¿½o')}
                 </button>
               </div>
             </div>
@@ -1377,7 +1478,7 @@ function Login({ onLogin, t }) {
       <form className="login-card w-full max-w-[440px] space-y-4 p-4 sm:p-5" onSubmit={submit}>
         <div className="flex flex-col items-center gap-2 text-center">
           <img src={deployBoxLogo} alt="DeployBox" className="login-logo h-auto w-full max-w-[190px]" />
-          <p className="text-sm text-slate-300/90">{t('login_subtitle', 'Painel administrativo para múltiplos projetos Node.js.')}</p>
+          <p className="text-sm text-slate-300/90">{t('login_subtitle', 'Painel administrativo para mï¿½ltiplos projetos Node.js.')}</p>
         </div>
         <div className="space-y-3">
           <input className="input login-input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('label_email', 'E-mail')} />
@@ -1411,10 +1512,10 @@ function Card({ title, value }) {
   )
 }
 
-function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated }) {
+function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated, onDone }) {
   async function handleDockerCreate(dockerPayload) {
     const baseSlug = String(dockerPayload.slug || '').trim()
-    const baseName = String(dockerPayload.name || '').trim() || 'Aplicação'
+    const baseName = String(dockerPayload.name || '').trim() || 'Aplicaï¿½ï¿½o'
     let created = null
     let lastError = null
     for (let attempt = 0; attempt < 20; attempt += 1) {
@@ -1426,6 +1527,7 @@ function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated
           slug: nextSlug,
           description: dockerPayload.description,
           type: 'docker',
+          active: false,
         })
         break
       } catch (err) {
@@ -1447,14 +1549,23 @@ function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated
       ['DOCKER_ENABLE_SSL', dockerPayload.enableSSL ? '1' : '0'],
       ['DOCKER_FORCE_HTTPS', dockerPayload.forceHTTPS ? '1' : '0'],
     ]
-    await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${created.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders, skipNotify: true })))
+    try {
+      await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${created.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders, skipNotify: true })))
+    } catch (err) {
+      throw new Error(err?.response?.data?.error || 'Falha ao salvar variï¿½veis do projeto.')
+    }
     const token = localStorage.getItem('nodepanel_github_token') || ''
     if (dockerPayload.sourceType === 'github' && dockerPayload.repository && token) {
       const repoUrl = dockerPayload.repository.startsWith('http') ? dockerPayload.repository : `https://github.com/${dockerPayload.repository}.git`
-      await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders, skipNotify: true })
+      try {
+        await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders, skipNotify: true })
+      } catch (err) {
+        throw new Error(err?.response?.data?.error || 'Falha ao clonar repositï¿½rio Git.')
+      }
     }
+    const template = String(dockerPayload.template || 'node')
     if (dockerPayload.sourceType !== 'github') {
-      const template = String(dockerPayload.template || 'node')
+      const customCompose = String(dockerPayload.customCompose || '').trim()
       const templateFiles = {
         node: {
           dockerfile: `FROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install --omit=dev || true\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"node\", \"app.js\"]\n`,
@@ -1476,15 +1587,24 @@ function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated
         dotnet: {
           dockerfile: `FROM mcr.microsoft.com/dotnet/sdk:8.0\nWORKDIR /src\nRUN dotnet new web -n app\nWORKDIR /src/app\nENV ASPNETCORE_URLS=http://0.0.0.0:${dockerPayload.internalPort || '3000'}\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"dotnet\", \"run\", \"--no-launch-profile\", \"--urls\", \"http://0.0.0.0:${dockerPayload.internalPort || '3000'}\"]\n`,
         },
+        wordpress: {
+          compose: `services:\n  db:\n    image: mysql:8.0\n    restart: unless-stopped\n    environment:\n      MYSQL_DATABASE: wordpress\n      MYSQL_USER: wordpress\n      MYSQL_PASSWORD: wordpress\n      MYSQL_ROOT_PASSWORD: rootpass\n    volumes:\n      - db_data:/var/lib/mysql\n\n  wordpress:\n    image: wordpress:6.5-apache\n    restart: unless-stopped\n    depends_on:\n      - db\n    ports:\n      - "\${DOCKER_HOST_PORT:-8080}:80"\n    environment:\n      WORDPRESS_DB_HOST: db:3306\n      WORDPRESS_DB_USER: wordpress\n      WORDPRESS_DB_PASSWORD: wordpress\n      WORDPRESS_DB_NAME: wordpress\n\nvolumes:\n  db_data:\n`,
+        },
         mysql_phpmyadmin: {
-          dockerfile: `FROM phpmyadmin:apache\nENV PMA_HOST=127.0.0.1\nENV PMA_PORT=3306\nRUN apt-get update && apt-get install -y mariadb-server && rm -rf /var/lib/apt/lists/*\nRUN printf '#!/bin/sh\\nset -e\\nservice mariadb start\\nmysql -e \"CREATE DATABASE IF NOT EXISTS appdb;\" || true\\nexec apache2-foreground\\n' > /usr/local/bin/start-with-mysql.sh && chmod +x /usr/local/bin/start-with-mysql.sh\nEXPOSE ${dockerPayload.internalPort || '8080'}\nCMD [\"/usr/local/bin/start-with-mysql.sh\"]\n`,
+          compose: `services:\n  db:\n    image: mysql:8.0\n    restart: unless-stopped\n    environment:\n      MYSQL_DATABASE: appdb\n      MYSQL_USER: app\n      MYSQL_PASSWORD: app123\n      MYSQL_ROOT_PASSWORD: rootpass\n    volumes:\n      - mysql_data:/var/lib/mysql\n\n  phpmyadmin:\n    image: phpmyadmin:latest\n    restart: unless-stopped\n    depends_on:\n      - db\n    ports:\n      - "\${DOCKER_HOST_PORT:-8080}:80"\n    environment:\n      PMA_HOST: db\n      PMA_PORT: 3306\n\nvolumes:\n  mysql_data:\n`,
         },
         blank: {
           dockerfile: `FROM alpine:3.20\nCMD [\"sh\", \"-c\", \"echo DeployBox Blank Container && sleep infinity\"]\n`,
         },
       }[template] || {}
-      if (templateFiles.dockerfile) {
+      if (customCompose) {
+        await api.put(`/projects/${created.id}/file`, { path: 'docker-compose.yml', content: customCompose }, { headers: authHeaders, skipNotify: true })
+      }
+      if (templateFiles.dockerfile && !customCompose) {
         await api.put(`/projects/${created.id}/file`, { path: 'Dockerfile', content: templateFiles.dockerfile }, { headers: authHeaders, skipNotify: true })
+      }
+      if (templateFiles.compose && !customCompose) {
+        await api.put(`/projects/${created.id}/file`, { path: 'docker-compose.yml', content: templateFiles.compose }, { headers: authHeaders, skipNotify: true })
       }
       if (template === 'node' && templateFiles.app) {
         await api.put(`/projects/${created.id}/file`, { path: 'app.js', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
@@ -1495,6 +1615,14 @@ function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated
       if (template === 'nginx' && templateFiles.app) await api.put(`/projects/${created.id}/file`, { path: 'index.html', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
     }
     if (dockerPayload.mode === 'deploy') {
+      const composeTemplates = new Set(['wordpress', 'mysql_phpmyadmin'])
+      if (composeTemplates.has(template) || String(dockerPayload.customCompose || '').trim()) {
+        try {
+          await api.post(`/projects/${created.id}/restart`, {}, { headers: authHeaders, skipNotify: true })
+        } catch (err) {
+          throw new Error(err?.response?.data?.error || 'Falha ao iniciar stack Docker Compose.')
+        }
+      } else {
       let dockerfileForDeploy = ''
       try {
         const fetchPath = String(dockerPayload.dockerfilePath || './Dockerfile').replace(/^\.\//, '') || 'Dockerfile'
@@ -1505,7 +1633,12 @@ function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated
         const { data: fallbackResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: 'Dockerfile' } })
         dockerfileForDeploy = String(fallbackResp?.content || '')
       }
-      await api.post(`/projects/${created.id}/docker/run-dockerfile`, { dockerfile: dockerfileForDeploy, port: String(dockerPayload.externalPort || '3000'), containerPort: String(dockerPayload.internalPort || '3000') }, { headers: authHeaders, skipNotify: true })
+      try {
+        await api.post(`/projects/${created.id}/docker/run-dockerfile`, { dockerfile: dockerfileForDeploy, port: String(dockerPayload.externalPort || '3000'), containerPort: String(dockerPayload.internalPort || '3000') }, { headers: authHeaders, skipNotify: true })
+      } catch (err) {
+        throw new Error(err?.response?.data?.error || 'Falha ao executar deploy do Dockerfile.')
+      }
+      }
     }
     notifyUi(dockerPayload.mode === 'deploy' ? 'Projeto Docker criado e deploy iniciado.' : 'Projeto Docker criado com sucesso.')
     onCreated?.()
@@ -1515,9 +1648,16 @@ function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated
     <div className="mt-6">
       <div className="card p-5 lg:p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold">{t('menu_create_application', 'Criar Aplicação')}</h2>
+          <h2 className="text-base font-semibold">{t('menu_create_application', 'Criar Aplicaï¿½ï¿½o')}</h2>
         </div>
-        <DockerWizard authHeaders={authHeaders} t={t} loading={loading} onCancel={() => {}} onCreate={handleDockerCreate} />
+        <DockerWizard
+          authHeaders={authHeaders}
+          t={t}
+          loading={loading}
+          onCancel={() => onDone?.()}
+          onCreate={handleDockerCreate}
+          onSuccess={() => onDone?.()}
+        />
       </div>
     </div>
   )
@@ -1615,7 +1755,7 @@ function ProjectList({
 
   async function handleDockerCreate(dockerPayload) {
     const baseSlug = String(dockerPayload.slug || '').trim()
-    const baseName = String(dockerPayload.name || '').trim() || 'Aplicação'
+    const baseName = String(dockerPayload.name || '').trim() || 'Aplicaï¿½ï¿½o'
     let created = null
     let lastError = null
     for (let attempt = 0; attempt < 20; attempt += 1) {
@@ -1627,6 +1767,7 @@ function ProjectList({
           slug: nextSlug,
           description: dockerPayload.description,
           type: 'docker',
+          active: false,
         })
         break
       } catch (err) {
@@ -1648,14 +1789,23 @@ function ProjectList({
       ['DOCKER_ENABLE_SSL', dockerPayload.enableSSL ? '1' : '0'],
       ['DOCKER_FORCE_HTTPS', dockerPayload.forceHTTPS ? '1' : '0'],
     ]
-    await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${created.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders, skipNotify: true })))
+    try {
+      await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${created.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders, skipNotify: true })))
+    } catch (err) {
+      throw new Error(err?.response?.data?.error || 'Falha ao salvar variï¿½veis do projeto.')
+    }
     const token = localStorage.getItem('nodepanel_github_token') || ''
     if (dockerPayload.sourceType === 'github' && dockerPayload.repository && token) {
       const repoUrl = dockerPayload.repository.startsWith('http') ? dockerPayload.repository : `https://github.com/${dockerPayload.repository}.git`
-      await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders, skipNotify: true })
+      try {
+        await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders, skipNotify: true })
+      } catch (err) {
+        throw new Error(err?.response?.data?.error || 'Falha ao clonar repositï¿½rio Git.')
+      }
     }
+    const template = String(dockerPayload.template || 'node')
     if (dockerPayload.sourceType !== 'github') {
-      const template = String(dockerPayload.template || 'node')
+      const customCompose = String(dockerPayload.customCompose || '').trim()
       const templateFiles = {
         node: {
           dockerfile: `FROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install --omit=dev || true\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"node\", \"app.js\"]\n`,
@@ -1677,15 +1827,24 @@ function ProjectList({
         dotnet: {
           dockerfile: `FROM mcr.microsoft.com/dotnet/sdk:8.0\nWORKDIR /src\nRUN dotnet new web -n app\nWORKDIR /src/app\nENV ASPNETCORE_URLS=http://0.0.0.0:${dockerPayload.internalPort || '3000'}\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"dotnet\", \"run\", \"--no-launch-profile\", \"--urls\", \"http://0.0.0.0:${dockerPayload.internalPort || '3000'}\"]\n`,
         },
+        wordpress: {
+          compose: `services:\n  db:\n    image: mysql:8.0\n    restart: unless-stopped\n    environment:\n      MYSQL_DATABASE: wordpress\n      MYSQL_USER: wordpress\n      MYSQL_PASSWORD: wordpress\n      MYSQL_ROOT_PASSWORD: rootpass\n    volumes:\n      - db_data:/var/lib/mysql\n\n  wordpress:\n    image: wordpress:6.5-apache\n    restart: unless-stopped\n    depends_on:\n      - db\n    ports:\n      - "\${DOCKER_HOST_PORT:-8080}:80"\n    environment:\n      WORDPRESS_DB_HOST: db:3306\n      WORDPRESS_DB_USER: wordpress\n      WORDPRESS_DB_PASSWORD: wordpress\n      WORDPRESS_DB_NAME: wordpress\n\nvolumes:\n  db_data:\n`,
+        },
         mysql_phpmyadmin: {
-          dockerfile: `FROM phpmyadmin:apache\nENV PMA_HOST=127.0.0.1\nENV PMA_PORT=3306\nRUN apt-get update && apt-get install -y mariadb-server && rm -rf /var/lib/apt/lists/*\nRUN printf '#!/bin/sh\\nset -e\\nservice mariadb start\\nmysql -e \"CREATE DATABASE IF NOT EXISTS appdb;\" || true\\nexec apache2-foreground\\n' > /usr/local/bin/start-with-mysql.sh && chmod +x /usr/local/bin/start-with-mysql.sh\nEXPOSE ${dockerPayload.internalPort || '8080'}\nCMD [\"/usr/local/bin/start-with-mysql.sh\"]\n`,
+          compose: `services:\n  db:\n    image: mysql:8.0\n    restart: unless-stopped\n    environment:\n      MYSQL_DATABASE: appdb\n      MYSQL_USER: app\n      MYSQL_PASSWORD: app123\n      MYSQL_ROOT_PASSWORD: rootpass\n    volumes:\n      - mysql_data:/var/lib/mysql\n\n  phpmyadmin:\n    image: phpmyadmin:latest\n    restart: unless-stopped\n    depends_on:\n      - db\n    ports:\n      - "\${DOCKER_HOST_PORT:-8080}:80"\n    environment:\n      PMA_HOST: db\n      PMA_PORT: 3306\n\nvolumes:\n  mysql_data:\n`,
         },
         blank: {
           dockerfile: `FROM alpine:3.20\nCMD [\"sh\", \"-c\", \"echo DeployBox Blank Container && sleep infinity\"]\n`,
         },
       }[template] || {}
-      if (templateFiles.dockerfile) {
+      if (customCompose) {
+        await api.put(`/projects/${created.id}/file`, { path: 'docker-compose.yml', content: customCompose }, { headers: authHeaders, skipNotify: true })
+      }
+      if (templateFiles.dockerfile && !customCompose) {
         await api.put(`/projects/${created.id}/file`, { path: 'Dockerfile', content: templateFiles.dockerfile }, { headers: authHeaders, skipNotify: true })
+      }
+      if (templateFiles.compose && !customCompose) {
+        await api.put(`/projects/${created.id}/file`, { path: 'docker-compose.yml', content: templateFiles.compose }, { headers: authHeaders, skipNotify: true })
       }
       if (template === 'node' && templateFiles.app) {
         await api.put(`/projects/${created.id}/file`, { path: 'app.js', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
@@ -1702,6 +1861,14 @@ function ProjectList({
       }
     }
     if (dockerPayload.mode === 'deploy') {
+      const composeTemplates = new Set(['wordpress', 'mysql_phpmyadmin'])
+      if (composeTemplates.has(template) || String(dockerPayload.customCompose || '').trim()) {
+        try {
+          await api.post(`/projects/${created.id}/restart`, {}, { headers: authHeaders, skipNotify: true })
+        } catch (err) {
+          throw new Error(err?.response?.data?.error || 'Falha ao iniciar stack Docker Compose.')
+        }
+      } else {
       let dockerfileForDeploy = ''
       try {
         const fetchPath = String(dockerPayload.dockerfilePath || './Dockerfile').replace(/^\.\//, '') || 'Dockerfile'
@@ -1712,15 +1879,20 @@ function ProjectList({
         const { data: fallbackResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: 'Dockerfile' } })
         dockerfileForDeploy = String(fallbackResp?.content || '')
       }
-      await api.post(
-        `/projects/${created.id}/docker/run-dockerfile`,
-        {
-          dockerfile: dockerfileForDeploy,
-          port: String(dockerPayload.externalPort || '3000'),
-          containerPort: String(dockerPayload.internalPort || '3000'),
-        },
-        { headers: authHeaders, skipNotify: true },
-      )
+      try {
+        await api.post(
+          `/projects/${created.id}/docker/run-dockerfile`,
+          {
+            dockerfile: dockerfileForDeploy,
+            port: String(dockerPayload.externalPort || '3000'),
+            containerPort: String(dockerPayload.internalPort || '3000'),
+          },
+          { headers: authHeaders, skipNotify: true },
+        )
+      } catch (err) {
+        throw new Error(err?.response?.data?.error || 'Falha ao executar deploy do Dockerfile.')
+      }
+      }
     }
     notifyUi(dockerPayload.mode === 'deploy' ? 'Projeto Docker criado e deploy iniciado.' : 'Projeto Docker criado com sucesso.')
     closeDockerPage()
@@ -1730,7 +1902,7 @@ function ProjectList({
     return (
       <div className="card p-5 lg:p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold">Criar Aplicação</h2>
+          <h2 className="text-base font-semibold">Criar Aplicaï¿½ï¿½o</h2>
           <button className="btn px-2 py-1" onClick={closeDockerPage}>{t('action_close', 'Fechar')}</button>
         </div>
         <DockerWizard
@@ -1758,7 +1930,7 @@ function ProjectList({
       <div className="mb-4 grid gap-3 md:grid-cols-[1fr,auto]">
         <input
           className="input"
-          placeholder={t('projects_search_placeholder', 'Buscar por nome, slug ou descrição')}
+          placeholder={t('projects_search_placeholder', 'Buscar por nome, slug ou descriï¿½ï¿½o')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -1789,8 +1961,8 @@ function ProjectList({
                     {p.name}
                   </a>
                   <div className="mt-1 text-xs text-slate-400">/{p.slug}</div>
-                  <div className="mt-1 text-[11px] uppercase tracking-wide text-slate-500">{p.type} • {p.status}</div>
-                  <div className="mt-1 truncate text-xs text-slate-500">{p.description || 'Sem descrição'}</div>
+                  <div className="mt-1 text-[11px] uppercase tracking-wide text-slate-500">{p.type} ï¿½ {p.status}</div>
+                  <div className="mt-1 truncate text-xs text-slate-500">{p.description || 'Sem descriï¿½ï¿½o'}</div>
                   {p.updated_at && (
                     <div className="mt-1 text-[11px] text-slate-500">Atualizado: {new Date(p.updated_at).toLocaleString()}</div>
                   )}
@@ -1835,7 +2007,7 @@ function ProjectList({
               </select>
               <input className="input" placeholder={t('label_name', 'Nome')} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
               <input className="input" placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
-              <input className="input" placeholder={t('label_description', 'Descrição')} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              <input className="input" placeholder={t('label_description', 'Descriï¿½ï¿½o')} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               {form.type === 'worker' ? (
                 <select className="input" value={form.worker_mode} onChange={(e) => setForm({ ...form, worker_mode: e.target.value })}>
                   <option value="manual">manual</option>
@@ -1901,7 +2073,7 @@ WORKDIR /src/app
 ENV ASPNETCORE_URLS=http://0.0.0.0:3000
 EXPOSE 3000
 CMD ["dotnet", "run", "--no-launch-profile", "--urls", "http://0.0.0.0:3000"]`,
-      hint: 'Cria um app ASP.NET mínimo e executa na porta 3000.',
+      hint: 'Cria um app ASP.NET mï¿½nimo e executa na porta 3000.',
     },
     {
       label: 'Python (Flask)',
@@ -1913,7 +2085,7 @@ RUN pip install --no-cache-dir flask
 RUN printf "from flask import Flask\\napp=Flask(__name__)\\n@app.get('/')\\ndef i(): return {'ok': True, 'app': 'DeployBox Python'}\\napp.run(host='0.0.0.0', port=3000)" > app.py
 EXPOSE 3000
 CMD ["python", "app.py"]`,
-      hint: 'Flask mínimo retornando JSON.',
+      hint: 'Flask mï¿½nimo retornando JSON.',
     },
     {
       label: 'Node.js (LTS)',
@@ -1927,7 +2099,7 @@ CMD ["node", "app.js"]`,
       hint: 'HTTP Node simples em 3000.',
     },
     {
-      label: 'Nginx (estático)',
+      label: 'Nginx (estï¿½tico)',
       port: '8082',
       containerPort: '3000',
       command: `FROM nginx:alpine
@@ -1935,7 +2107,7 @@ RUN printf "<h1>DeployBox Nginx OK</h1>" > /usr/share/nginx/html/index.html
 RUN sed -i 's/listen       80;/listen       3000;/g' /etc/nginx/conf.d/default.conf
 EXPOSE 3000
 CMD ["nginx", "-g", "daemon off;"]`,
-      hint: 'Página estática com Nginx em 3000.',
+      hint: 'Pï¿½gina estï¿½tica com Nginx em 3000.',
     },
   ]
   const [workerParams, setWorkerParams] = useState('{\n  "mes": "04",\n  "ano": "2026"\n}')
@@ -2009,7 +2181,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
           setSelectedFilePath(targetPath)
           setSelectedTreePath(targetPath)
           setSelectedTreeType('file')
-          setCode(`Arquivo SQLite: ${targetPath}\n\nEste arquivo e binario e aparece aqui para controle dos arquivos do projeto.\nUse a aba Banco SQL para consultar ou alterar os dados.`)
+          setCode(`Arquivo SQLite: ${targetPath}\n\nEste arquivo ï¿½ binï¿½rio e aparece aqui para controle dos arquivos do projeto.\nUse a aba Banco SQL para consultar ou alterar os dados.`)
           setFileDirty(false)
           return
         }
@@ -2041,7 +2213,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
         setSelectedFilePath(path)
         setSelectedTreePath(path)
         setSelectedTreeType('file')
-        setCode(`Arquivo SQLite: ${path}\n\nEste arquivo e binario e aparece aqui para controle dos arquivos do projeto.\nUse a aba Banco SQL para consultar ou alterar os dados.`)
+        setCode(`Arquivo SQLite: ${path}\n\nEste arquivo ï¿½ binï¿½rio e aparece aqui para controle dos arquivos do projeto.\nUse a aba Banco SQL para consultar ou alterar os dados.`)
         setFileDirty(false)
         return
       }
@@ -2158,7 +2330,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
     const toPath = dir ? `${dir}/${name}` : name
     if (!fromPath || !toPath) return
     if (moveMode === 'move' && selectedTreeType === 'folder' && (toPath === fromPath || toPath.startsWith(`${fromPath}/`))) {
-      notifyUi('Destino inválido para pasta', 'error')
+      notifyUi('Destino invï¿½lido para pasta', 'error')
       return
     }
     try {
@@ -2265,9 +2437,9 @@ CMD ["nginx", "-g", "daemon off;"]`,
       const { data } = await api.post('/git/repos', { token: clean }, { headers: authHeaders })
       const repos = data?.repos || []
       setGitRepos(repos)
-      if (!repos.length) notifyUi(t('clone_git_no_repos', 'Nenhum repositório encontrado na conta conectada'), 'error')
+      if (!repos.length) notifyUi(t('clone_git_no_repos', 'Nenhum repositï¿½rio encontrado na conta conectada'), 'error')
     } catch (err) {
-      notifyUi(err?.response?.data?.error || t('clone_git_repos_error', 'Falha ao listar repositórios'), 'error')
+      notifyUi(err?.response?.data?.error || t('clone_git_repos_error', 'Falha ao listar repositï¿½rios'), 'error')
     } finally {
       setGitReposLoading(false)
     }
@@ -2469,7 +2641,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
           setDockerCommand(data.content)
         }
       } catch (_) {
-        // ignore: usa template default quando ainda não existe Dockerfile salvo
+        // ignore: usa template default quando ainda nï¿½o existe Dockerfile salvo
       }
     })()
   }, [project.id, project.type])
@@ -2520,7 +2692,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
                 >
                   {selectedFileIsBinary
                     ? `Banco SQLite (${selectedFilePath})`
-                    : selectedFilePath ? `${t('save_code', 'Salvar Código')} (${selectedFilePath})` : t('save_code', 'Salvar Código')}
+                    : selectedFilePath ? `${t('save_code', 'Salvar Cï¿½digo')} (${selectedFilePath})` : t('save_code', 'Salvar Cï¿½digo')}
                 </button>
               </div>
 
@@ -2594,7 +2766,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
             <div className="flex flex-wrap items-center gap-2">
               <button className="btn" onClick={async () => {
                 let parsed = {}
-                try { parsed = JSON.parse(workerParams || '{}') } catch { notifyUi(t('error_invalid_json', 'JSON inválido'), 'error'); return }
+                try { parsed = JSON.parse(workerParams || '{}') } catch { notifyUi(t('error_invalid_json', 'JSON invï¿½lido'), 'error'); return }
                 await api.post(`/projects/${project.id}/run-now`, { params: parsed }, { headers: authHeaders })
               }}>{t('action_run_now', 'Executar Agora')}</button>
               <select className="input max-w-[220px]" value={preset} onChange={(e) => setPreset(e.target.value)}>
@@ -2625,7 +2797,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4">
           <div className="card w-full max-w-xl p-5">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-base font-semibold">{t('clone_git_title', 'Clonar Repositório Git')}</h3>
+              <h3 className="text-base font-semibold">{t('clone_git_title', 'Clonar Repositï¿½rio Git')}</h3>
               <button className="btn px-2 py-1" onClick={() => setGitCloneOpen(false)}>{t('action_close', 'Fechar')}</button>
             </div>
             <div className="space-y-3">
@@ -2653,8 +2825,8 @@ CMD ["nginx", "-g", "daemon off;"]`,
               >
                 <option value="">
                   {gitReposLoading
-                    ? t('clone_git_loading_repos', 'Carregando repositórios...')
-                    : t('clone_git_repo_select_placeholder', 'Selecione um repositório conectado')}
+                    ? t('clone_git_loading_repos', 'Carregando repositï¿½rios...')
+                    : t('clone_git_repo_select_placeholder', 'Selecione um repositï¿½rio conectado')}
                 </option>
                 {gitRepos.map((repo) => (
                   <option key={repo.id || repo.fullName} value={repo.cloneUrl}>
@@ -2675,7 +2847,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
                 <input
                   className="input"
                   type="password"
-                  placeholder={t('clone_git_token_placeholder', 'Token GitHub (opcional para repositório público)')}
+                  placeholder={t('clone_git_token_placeholder', 'Token GitHub (opcional para repositï¿½rio pï¿½blico)')}
                   value={gitToken}
                   onChange={(e) => {
                     setGitToken(e.target.value)
@@ -2714,7 +2886,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
                     if (!trimmed) {
                       localStorage.removeItem(gitTokenStorageKey)
                       setGitTokenSaved(false)
-                      notifyUi(t('clone_git_token_not_saved', 'Token não salvo.'), 'error')
+                      notifyUi(t('clone_git_token_not_saved', 'Token nï¿½o salvo.'), 'error')
                       return
                     }
                     localStorage.setItem(gitTokenStorageKey, trimmed)
@@ -2741,7 +2913,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
                 </button>
               </div>
               <div className="text-xs text-slate-400">
-                {t('clone_git_connect_hint', 'Clique em Conectar, faça login no GitHub e o token volta automaticamente para esta tela.')}
+                {t('clone_git_connect_hint', 'Clique em Conectar, faï¿½a login no GitHub e o token volta automaticamente para esta tela.')}
               </div>
               {gitTokenSaved && (
                 <div className="text-xs text-emerald-300">{t('clone_git_token_saved', 'Token salvo neste navegador.')}</div>
@@ -2751,7 +2923,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
                 disabled={gitBranchesLoading}
                 onClick={async () => {
                   if (!gitRepoUrl.trim()) {
-                    notifyUi(t('clone_git_repo_required', 'Informe a URL do repositório Git'), 'error')
+                    notifyUi(t('clone_git_repo_required', 'Informe a URL do repositï¿½rio Git'), 'error')
                     return
                   }
                   setGitBranchesLoading(true)
@@ -2781,14 +2953,14 @@ CMD ["nginx", "-g", "daemon off;"]`,
                 ))}
               </select>
               <div className="text-xs text-slate-400">
-                {t('clone_git_hint', 'Clona o repositório para este projeto e reinicia automaticamente.')}
+                {t('clone_git_hint', 'Clona o repositï¿½rio para este projeto e reinicia automaticamente.')}
               </div>
               <button
                 className="btn w-full border-panel-accent text-panel-accent"
                 disabled={gitCloning || !gitBranches.length}
                 onClick={async () => {
                   if (!gitRepoUrl.trim()) {
-                    notifyUi(t('clone_git_repo_required', 'Informe a URL do repositório Git'), 'error')
+                    notifyUi(t('clone_git_repo_required', 'Informe a URL do repositï¿½rio Git'), 'error')
                     return
                   }
                   if (!gitBranch.trim()) {
@@ -2811,7 +2983,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
                   }
                 }}
               >
-                {gitCloning ? t('clone_git_submitting', 'Clonando...') : t('clone_git_submit', 'Clonar Repositório')}
+                {gitCloning ? t('clone_git_submitting', 'Clonando...') : t('clone_git_submit', 'Clonar Repositï¿½rio')}
               </button>
             </div>
           </div>
@@ -2892,17 +3064,17 @@ CMD ["nginx", "-g", "daemon off;"]`,
                 src/<br />
               </div>
 
-              <p><strong>Checklist rápido:</strong></p>
+              <p><strong>Checklist rï¿½pido:</strong></p>
               <ul className="list-disc space-y-1 pl-5 text-slate-300">
                 <li>O arquivo principal deve ser <code>index.js</code>.</li>
                 <li>Para API, exporte <code>routes</code>; para Worker, exporte <code>run</code>; para App, exporte <code>handle</code> (ou use <code>public/</code>).</li>
                 <li>Para Docker, inclua <code>Dockerfile</code>, <code>Dockerfile</code> e <code>app.js</code>.</li>
-                <li>Não envie caminhos inválidos (ex.: <code>../</code>).</li>
-                <li>Após upload, o DeployBox aplica os arquivos, versiona <code>index.js</code> e reinicia o projeto.</li>
+                <li>Nï¿½o envie caminhos invï¿½lidos (ex.: <code>../</code>).</li>
+                <li>Apï¿½s upload, o DeployBox aplica os arquivos, versiona <code>index.js</code> e reinicia o projeto.</li>
               </ul>
 
-              <p><strong>Dependências:</strong> inclua <code>package.json</code>. Depois, instale na aba <strong>Dependências</strong> ou com <code>npm install</code>.</p>
-              <p><strong>Banco:</strong> se não enviar <code>database.db</code>, o projeto cria/usa o banco próprio automaticamente.</p>
+              <p><strong>Dependï¿½ncias:</strong> inclua <code>package.json</code>. Depois, instale na aba <strong>Dependï¿½ncias</strong> ou com <code>npm install</code>.</p>
+              <p><strong>Banco:</strong> se nï¿½o enviar <code>database.db</code>, o projeto cria/usa o banco prï¿½prio automaticamente.</p>
 
               <div className="rounded-lg border border-panel-border bg-slate-950/30 p-3">
                 <div className="mb-2 text-xs text-slate-300">Baixar ZIP modelo para editar e subir:</div>
@@ -3046,7 +3218,7 @@ CMD ["nginx", "-g", "daemon off;"]`,
 
         {project.type === 'worker' && (
           <div className="card min-h-0 p-3 flex flex-col">
-            <div className="mb-2 text-sm font-medium shrink-0">Parâmetros JSON (Execução manual)</div>
+            <div className="mb-2 text-sm font-medium shrink-0">Parï¿½metros JSON (Execuï¿½ï¿½o manual)</div>
             <textarea
               className="input min-h-[180px] flex-1 font-mono text-xs"
               value={workerParams}
@@ -3120,7 +3292,7 @@ function EnvTab({ project, authHeaders, t }) {
       <div className="mb-3 grid gap-2 md:grid-cols-[1fr,1fr,120px,120px]">
         <input className="input" placeholder="Chave" value={form.envKey} onChange={(e) => setForm({ ...form, envKey: e.target.value })} />
         <input className="input" placeholder="Valor" value={form.envValue} onChange={(e) => setForm({ ...form, envValue: e.target.value })} />
-        <label className="btn flex items-center justify-center gap-2"><input type="checkbox" checked={form.isSecret} onChange={(e) => setForm({ ...form, isSecret: e.target.checked })} />Sensível</label>
+        <label className="btn flex items-center justify-center gap-2"><input type="checkbox" checked={form.isSecret} onChange={(e) => setForm({ ...form, isSecret: e.target.checked })} />Sensï¿½vel</label>
         <button className="btn border-panel-accent text-panel-accent" onClick={async () => {
           await api.post(`/projects/${project.id}/env`, form, { headers: authHeaders })
           setForm({ envKey: '', envValue: '', isSecret: false })
@@ -3131,7 +3303,7 @@ function EnvTab({ project, authHeaders, t }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-panel-border text-left text-slate-400">
-            <th className="py-2">Chave</th><th>Valor</th><th>Sensível</th><th></th>
+            <th className="py-2">Chave</th><th>Valor</th><th>Sensï¿½vel</th><th></th>
           </tr>
         </thead>
         <tbody>
@@ -3139,7 +3311,7 @@ function EnvTab({ project, authHeaders, t }) {
             <tr key={item.id} className="border-b border-panel-border/60">
               <td className="py-2">{item.envKey}</td>
               <td>{item.isSecret ? '********' : item.envValue}</td>
-              <td>{item.isSecret ? 'Sim' : 'Não'}</td>
+              <td>{item.isSecret ? 'Sim' : 'Nï¿½o'}</td>
               <td className="text-right">
                 <button className="btn text-xs" onClick={() => setForm({ envKey: item.envKey, envValue: item.envValue, isSecret: item.isSecret })}>Editar</button>
                 <button className="btn ml-2 text-xs border-red-500 text-red-300" onClick={async () => {
@@ -3269,7 +3441,7 @@ function DepsTab({ project, authHeaders, t }) {
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-panel-border text-left text-slate-400"><th className="py-2">Pacote</th><th>Versão</th><th>Instalado</th><th></th></tr>
+          <tr className="border-b border-panel-border text-left text-slate-400"><th className="py-2">Pacote</th><th>Versï¿½o</th><th>Instalado</th><th></th></tr>
         </thead>
         <tbody>
           {deps.map((d) => (
@@ -3416,7 +3588,7 @@ function VersionsTab({ project, authHeaders, onRestored, t }) {
     <div>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-panel-border text-left text-slate-400"><th className="py-2">Versão</th><th>Data</th><th>Autor</th><th></th></tr>
+          <tr className="border-b border-panel-border text-left text-slate-400"><th className="py-2">Versï¿½o</th><th>Data</th><th>Autor</th><th></th></tr>
         </thead>
         <tbody>
           {versions.map((v) => (
@@ -3480,3 +3652,9 @@ function MonitorTab({ project, authHeaders, onRefreshProject, t }) {
     </div>
   )
 }
+
+
+
+
+
+

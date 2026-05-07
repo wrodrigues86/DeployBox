@@ -4,18 +4,18 @@ import axios from 'axios'
 const api = axios.create({ baseURL: '/api' })
 
 const POPULAR_TEMPLATES = [
-  { id: 'wordpress', name: 'WordPress', category: 'CMS', description: 'Site e blog prontos para publicar.', icon: 'https://cdn.simpleicons.org/wordpress/21759B', framework: 'PHP', template: 'php', internalPort: '8080' },
+  { id: 'wordpress', name: 'WordPress', category: 'CMS', description: 'Site e blog prontos para publicar.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/wordpress/wordpress-plain.svg', framework: 'PHP', template: 'wordpress', internalPort: '8080' },
   { id: 'n8n', name: 'n8n', category: 'Automation', description: 'Automacao de workflows visuais.', icon: 'https://cdn.simpleicons.org/n8n/EA4B71', framework: 'Node.js', template: 'node', internalPort: '5678' },
-  { id: 'mysql', name: 'MySQL', category: 'Database', description: 'Banco de dados relacional popular.', icon: 'https://cdn.simpleicons.org/mysql/4479A1', framework: 'Dockerfile', template: 'blank', internalPort: '3306' },
-  { id: 'mysql-phpmyadmin', name: 'MySQL + phpMyAdmin', category: 'Database', description: 'MySQL com painel phpMyAdmin no mesmo projeto.', icon: 'https://cdn.simpleicons.org/phpmyadmin/6C78AF', framework: 'Dockerfile', template: 'mysql_phpmyadmin', internalPort: '8080' },
-  { id: 'postgresql', name: 'PostgreSQL', category: 'Database', description: 'Banco relacional avancado e robusto.', icon: 'https://cdn.simpleicons.org/postgresql/4169E1', framework: 'Dockerfile', template: 'blank', internalPort: '5432' },
-  { id: 'mongodb', name: 'MongoDB', category: 'Database', description: 'Banco NoSQL para apps modernas.', icon: 'https://cdn.simpleicons.org/mongodb/47A248', framework: 'Dockerfile', template: 'blank', internalPort: '27017' },
-  { id: 'redis', name: 'Redis', category: 'Cache', description: 'Cache em memoria rapido e leve.', icon: 'https://cdn.simpleicons.org/redis/DC382D', framework: 'Dockerfile', template: 'blank', internalPort: '6379' },
+  { id: 'mysql', name: 'MySQL', category: 'Database', description: 'Banco de dados relacional popular.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg', framework: 'Dockerfile', template: 'blank', internalPort: '3306' },
+  { id: 'mysql-phpmyadmin', name: 'MySQL + phpMyAdmin', category: 'Database', description: 'MySQL com painel phpMyAdmin no mesmo projeto.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/phpmyadmin/phpmyadmin-original.svg', framework: 'Dockerfile', template: 'mysql_phpmyadmin', internalPort: '8080' },
+  { id: 'postgresql', name: 'PostgreSQL', category: 'Database', description: 'Banco relacional avancado e robusto.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg', framework: 'Dockerfile', template: 'blank', internalPort: '5432' },
+  { id: 'mongodb', name: 'MongoDB', category: 'Database', description: 'Banco NoSQL para apps modernas.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg', framework: 'Dockerfile', template: 'blank', internalPort: '27017' },
+  { id: 'redis', name: 'Redis', category: 'Cache', description: 'Cache em memoria rapido e leve.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg', framework: 'Dockerfile', template: 'blank', internalPort: '6379' },
   { id: 'uptime-kuma', name: 'Uptime Kuma', category: 'Monitoring', description: 'Monitoramento de uptime amigavel.', icon: 'https://cdn.simpleicons.org/uptimekuma/5CDD8B', framework: 'Dockerfile', template: 'blank', internalPort: '3001' },
   { id: 'evolution-api', name: 'Evolution API', category: 'API', description: 'API para automacao de mensagens.', icon: 'https://cdn.simpleicons.org/whatsapp/25D366', framework: 'Node.js', template: 'node', internalPort: '8080' },
-  { id: 'dotnet-api', name: '.NET API', category: 'Backend', description: 'API em .NET pronta para deploy.', icon: 'https://cdn.simpleicons.org/dotnet/512BD4', framework: '.NET', template: 'dotnet', internalPort: '8080' },
+  { id: 'dotnet-api', name: '.NET API', category: 'Backend', description: 'API em .NET pronta para deploy.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dot-net/dot-net-original.svg', framework: '.NET', template: 'dotnet', internalPort: '8080' },
   { id: 'minio', name: 'MinIO', category: 'Storage', description: 'Armazenamento de objetos compativel S3.', icon: 'https://cdn.simpleicons.org/minio/C72E49', framework: 'Dockerfile', template: 'blank', internalPort: '9000' },
-  { id: 'rabbitmq', name: 'RabbitMQ', category: 'Queue', description: 'Mensageria para sistemas distribuidos.', icon: 'https://cdn.simpleicons.org/rabbitmq/FF6600', framework: 'Dockerfile', template: 'blank', internalPort: '5672' },
+  { id: 'rabbitmq', name: 'RabbitMQ', category: 'Queue', description: 'Mensageria para sistemas distribuidos.', icon: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rabbitmq/rabbitmq-original.svg', framework: 'Dockerfile', template: 'blank', internalPort: '5672' },
 ]
 
 const PIPELINE_STEPS = [
@@ -38,7 +38,7 @@ function slugify(v = '') {
 function detectFramework({ template, repository, dockerfilePath }) {
   const normalizedRepo = String(repository || '').toLowerCase()
   const normalizedDockerfile = String(dockerfilePath || '').toLowerCase()
-  if (template === 'php' || normalizedRepo.includes('laravel') || normalizedRepo.includes('wordpress')) return 'PHP'
+  if (template === 'php' || template === 'wordpress' || normalizedRepo.includes('laravel') || normalizedRepo.includes('wordpress')) return 'PHP'
   if (template === 'python' || normalizedRepo.includes('django') || normalizedRepo.includes('flask') || normalizedRepo.includes('fastapi')) return 'Python'
   if (template === 'dotnet' || normalizedRepo.includes('dotnet') || normalizedRepo.includes('aspnet')) return '.NET'
   if (normalizedDockerfile.includes('dockerfile') || template === 'blank' || template === 'mysql_phpmyadmin') return 'Dockerfile'
@@ -75,9 +75,9 @@ function volumeToRows(volumes) {
 
 function SectionCard({ title, subtitle, children }) {
   return (
-    <section className="rounded-2xl border border-slate-700/70 bg-slate-900/70 p-5 shadow-[0_8px_28px_rgba(2,6,23,0.45)] md:p-6">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
+    <section className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-4 shadow-[0_8px_28px_rgba(2,6,23,0.45)] md:p-5">
+      <div className="mb-3">
+        <h3 className="text-base font-semibold text-slate-100">{title}</h3>
         {subtitle ? <p className="mt-1 text-sm text-slate-400">{subtitle}</p> : null}
       </div>
       {children}
@@ -85,7 +85,7 @@ function SectionCard({ title, subtitle, children }) {
   )
 }
 
-export default function DockerWizard({ authHeaders, t, loading, onCancel, onCreate }) {
+export default function DockerWizard({ authHeaders, t, loading, onCancel, onCreate, onSuccess }) {
   const [search, setSearch] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState('node')
   const [selectedTemplateName, setSelectedTemplateName] = useState('Aplicação Personalizada')
@@ -100,6 +100,9 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
   const [pipelineIndex, setPipelineIndex] = useState(-1)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [customTemplates, setCustomTemplates] = useState([])
+  const [loadingCustomTemplates, setLoadingCustomTemplates] = useState(false)
+  const [selectedTemplateMeta, setSelectedTemplateMeta] = useState(null)
   const [form, setForm] = useState({
     name: 'meu-app',
     description: 'Aplicacao publicada com DeployBox',
@@ -107,7 +110,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
     branch: 'main',
     autoDeploy: true,
     internalPort: '3000',
-    externalPort: '49152',
+    externalPort: '8080',
     subdomain: '',
     domainBase: '',
     enableSSL: true,
@@ -117,6 +120,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
     restartPolicy: 'unless-stopped',
     dockerfilePath: './Dockerfile',
     startCommand: '',
+    customCompose: '',
     envs: [{ key: '', value: '' }],
     volumes: [{ hostPath: '', containerPath: '' }],
   })
@@ -127,22 +131,40 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
   )
 
   const templates = useMemo(() => {
+    const mappedCustom = (customTemplates || []).map((item) => ({
+      id: `custom-${item.id}`,
+      name: item.name,
+      category: item.category || 'Custom',
+      description: item.description || 'Template personalizado',
+      icon: item.iconDataUrl || 'https://cdn.simpleicons.org/docker/2496ED',
+      framework: item.sourceType === 'compose' ? 'Dockerfile' : 'Git',
+      template: item.sourceType === 'compose' ? 'blank' : 'node',
+      internalPort: '8080',
+      sourceType: item.sourceType,
+      gitUrl: item.gitUrl || '',
+      composeText: item.composeText || '',
+      templateId: item.id,
+    }))
+    const allTemplates = [...mappedCustom, ...POPULAR_TEMPLATES]
     const keyword = search.trim().toLowerCase()
-    if (!keyword) return POPULAR_TEMPLATES
-    return POPULAR_TEMPLATES.filter((item) => {
+    if (!keyword) return allTemplates
+    return allTemplates.filter((item) => {
       const haystack = `${item.name} ${item.category} ${item.description}`.toLowerCase()
       return haystack.includes(keyword)
     })
-  }, [search])
+  }, [search, customTemplates])
 
   function applyTemplate(item) {
     setSelectedTemplate(item.template)
     setSelectedTemplateName(item.name)
+    setSelectedTemplateMeta(item)
     setForm((prev) => ({
       ...prev,
       name: item.name,
       description: item.description,
       internalPort: item.internalPort,
+      repository: item.sourceType === 'git' ? item.gitUrl || prev.repository : '',
+      customCompose: item.sourceType === 'compose' ? item.composeText || '' : '',
     }))
   }
 
@@ -170,6 +192,22 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
     window.addEventListener('message', onGithubOauthMessage)
     return () => window.removeEventListener('message', onGithubOauthMessage)
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      setLoadingCustomTemplates(true)
+      try {
+        const { data } = await api.get('/app-templates', { headers: authHeaders })
+        if (!cancelled) setCustomTemplates(Array.isArray(data) ? data : [])
+      } catch (_) {
+        if (!cancelled) setCustomTemplates([])
+      } finally {
+        if (!cancelled) setLoadingCustomTemplates(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [authHeaders])
 
   async function conectarGithub() {
     setError('')
@@ -225,18 +263,23 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
   async function runSubmit(mode) {
     setError('')
     if (!form.name.trim()) return setError('Informe o nome da aplicacao.')
-    if (!form.repository.trim()) return setError('Informe o repositorio GitHub.')
+    const hasRepository = !!form.repository.trim()
+    const sourceTypeResolved = selectedTemplateMeta?.sourceType === 'compose'
+      ? 'template'
+      : (hasRepository ? 'github' : 'template')
 
     const payload = {
       name: form.name.trim(),
       slug: slugify(form.name),
       description: form.description.trim() || 'Aplicacao publicada com DeployBox',
       template: selectedTemplate,
-      sourceType: 'github',
+      sourceType: sourceTypeResolved,
       repository: toRepositoryFullName(form.repository),
+      customCompose: form.customCompose || '',
+      customTemplateId: selectedTemplateMeta?.templateId || null,
       branch: form.branch,
       autoDeploy: !!form.autoDeploy,
-      externalPort: String(form.externalPort || '49152'),
+      externalPort: String(form.externalPort || '8080'),
       internalPort: String(form.internalPort || '3000'),
       dockerfilePath: form.dockerfilePath || './Dockerfile',
       subdomain: form.subdomain,
@@ -263,8 +306,11 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
       }, 550)
       try {
         await onCreate(payload)
+        onSuccess?.(mode)
       } catch (err) {
-        setError(err?.response?.data?.error || err?.message || 'Falha ao publicar aplicacao.')
+        const status = err?.response?.status
+        const backendError = err?.response?.data?.error
+        setError(backendError || (status ? `Falha ao publicar aplicacao (HTTP ${status}).` : (err?.message || 'Falha ao publicar aplicacao.')))
       } finally {
         clearInterval(interval)
         setPipelineIndex(PIPELINE_STEPS.length - 1)
@@ -276,27 +322,31 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
     setBusy(true)
     try {
       await onCreate(payload)
+      onSuccess?.(mode)
     } catch (err) {
-      setError(err?.response?.data?.error || err?.message || 'Falha ao criar aplicacao.')
+      const status = err?.response?.status
+      const backendError = err?.response?.data?.error
+      setError(backendError || (status ? `Falha ao criar aplicacao (HTTP ${status}).` : (err?.message || 'Falha ao criar aplicacao.')))
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-2xl border border-slate-700/80 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.22),_transparent_52%),linear-gradient(160deg,rgba(15,23,42,0.95),rgba(2,6,23,0.94))] p-6 md:p-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-50">Criar Aplicação</h2>
+    <div className="space-y-4">
+      <section className="rounded-xl border border-slate-700/80 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.22),_transparent_52%),linear-gradient(160deg,rgba(15,23,42,0.95),rgba(2,6,23,0.94))] p-5 md:p-6">
+        <h2 className="text-xl font-semibold tracking-tight text-slate-50">Criar Aplicação</h2>
         <p className="mt-2 max-w-2xl text-sm text-slate-300">Deploy aplicacoes Docker e projetos GitHub em poucos cliques.</p>
       </section>
 
-      {error ? <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</div> : null}
+      {error ? <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2.5 text-sm text-red-300">{error}</div> : null}
 
       <SectionCard title="Templates Populares" subtitle="Escolha uma aplicacao pronta para acelerar o deploy.">
-        <label className="mb-4 block text-sm font-medium text-slate-200">
+        {loadingCustomTemplates ? <div className="mb-2 text-xs text-slate-400">Carregando templates personalizados...</div> : null}
+        <label className="mb-3 block text-sm font-medium text-slate-200">
           Buscar Aplicações
           <input
-            className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+            className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
             placeholder="mysql"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -304,14 +354,14 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
         </label>
 
         <div className="rounded-xl border border-slate-700 bg-slate-950/30 p-2">
-          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {templates.map((item) => (
-              <div key={item.id} className="rounded-lg border border-slate-700 bg-slate-950/65 px-3 py-2">
+              <div key={item.id} className="rounded-lg border border-slate-700 bg-slate-950/65 px-2.5 py-2 transition hover:border-cyan-500/40 hover:bg-slate-900/80">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-800/90 p-1.5">
-                        <img src={item.icon} alt={item.name} className="h-6 w-6" loading="lazy" />
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800/90 p-1.5">
+                        <img src={item.icon} alt={item.name} className="h-7 w-7 object-contain" loading="lazy" />
                       </div>
                       <div className="min-w-0">
                         <div className="truncate text-sm font-semibold text-slate-100">{item.name}</div>
@@ -321,7 +371,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
                     <div className="mt-2 truncate text-xs text-slate-400">{item.description}</div>
                   </div>
                   <button
-                    className="rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-500/20"
+                    className="rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-2.5 py-1.5 text-xs font-medium text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-500/20"
                     onClick={() => applyTemplate(item)}
                   >
                     Instalar
@@ -334,17 +384,17 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
       </SectionCard>
 
       <SectionCard title="Repositório" subtitle="Conecte seu projeto GitHub com o mínimo de configuração.">
-        <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           <button className="rounded-xl border border-slate-600 px-3 py-2 text-sm text-slate-200 transition hover:border-cyan-400" onClick={carregarRepositoriosConectados}>
             {connectingGithub ? 'Conectando GitHub...' : loadingRepos ? 'Carregando repositórios...' : 'Usar repositório conectado (opcional)'}
           </button>
           {!!repos.length && <span className="text-xs text-slate-400">{repos.length} repositórios encontrados</span>}
         </div>
         {!!repos.length && (
-          <label className="mb-4 block text-sm font-medium text-slate-200">
+          <label className="mb-3 block text-sm font-medium text-slate-200">
             Repositórios conectados
             <select
-              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
               value={selectedConnectedRepo}
               onChange={(e) => {
                 const repo = e.target.value
@@ -360,10 +410,10 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
             </select>
           </label>
         )}
-        <label className="mb-4 block text-sm font-medium text-slate-200">
+        <label className="mb-3 block text-sm font-medium text-slate-200">
           Repositório GitHub
           <input
-            className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+            className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
             placeholder="https://github.com/user/project"
             value={form.repository}
             onChange={(e) => setForm((prev) => ({ ...prev, repository: e.target.value, branch: detectBranch(e.target.value) }))}
@@ -373,7 +423,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
           <label className="text-sm font-medium text-slate-200">
             Branch
             <select
-              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
               value={form.branch}
               onChange={(e) => setForm((prev) => ({ ...prev, branch: e.target.value }))}
             >
@@ -386,7 +436,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
             </select>
             {loadingBranches ? <div className="mt-1 text-xs text-slate-400">Carregando branches...</div> : null}
           </label>
-          <label className="mt-8 flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-200 md:mt-7">
+          <label className="mt-8 flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-200 md:mt-7">
             <input type="checkbox" checked={form.autoDeploy} onChange={(e) => setForm((prev) => ({ ...prev, autoDeploy: e.target.checked }))} />
             Deploy automatico ao receber push
           </label>
@@ -398,7 +448,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
           <label className="text-sm font-medium text-slate-200">
             Nome da Aplicação
             <input
-              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
               value={form.name}
               onChange={(e) => {
                 const nextName = e.target.value
@@ -409,7 +459,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
           </label>
           <label className="text-sm font-medium text-slate-200">
             Framework
-            <div className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            <div className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5 text-sm text-emerald-200">
               {`OK ${framework} detectado`}
             </div>
           </label>
@@ -431,7 +481,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
           <label className="text-sm font-medium text-slate-200">
             Porta Interna
             <input
-              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
               value={form.internalPort}
               onChange={(e) => setForm((prev) => ({ ...prev, internalPort: e.target.value.replace(/[^\d]/g, '') }))}
             />
@@ -439,7 +489,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
           <label className="text-sm font-medium text-slate-200">
             Porta Externa
             <input
-              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+              className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
               value={form.externalPort}
               onChange={(e) => setForm((prev) => ({ ...prev, externalPort: e.target.value.replace(/[^\d]/g, '') }))}
               placeholder="Auto"
@@ -449,10 +499,10 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
       </SectionCard>
 
       <SectionCard title="Domínio" subtitle="Domínio com SSL automático pronto para produção.">
-        <label className="mb-4 block text-sm font-medium text-slate-200">
+        <label className="mb-3 block text-sm font-medium text-slate-200">
           Domínio
           <input
-            className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
+            className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100 outline-none transition focus:border-cyan-400"
             value={form.subdomain && form.domainBase ? `${form.subdomain}.${form.domainBase}` : ''}
             onChange={(e) => {
               const clean = e.target.value.trim().replace(/^https?:\/\//, '')
@@ -467,11 +517,11 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
           />
         </label>
         <div className="grid gap-3 md:grid-cols-2">
-          <label className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-200">
+          <label className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-200">
             <input type="checkbox" checked={form.enableSSL} onChange={(e) => setForm((prev) => ({ ...prev, enableSSL: e.target.checked }))} />
             SSL automatico
           </label>
-          <label className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-950/60 px-4 py-3 text-sm text-slate-200">
+          <label className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-sm text-slate-200">
             <input type="checkbox" checked={form.forceHTTPS} onChange={(e) => setForm((prev) => ({ ...prev, forceHTTPS: e.target.checked }))} />
             Forcar HTTPS
           </label>
@@ -525,20 +575,20 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
             <div className="grid gap-4 md:grid-cols-2">
               <label className="text-sm font-medium text-slate-200">
                 CPU
-                <input className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100" value={form.cpuLimit} onChange={(e) => setForm((prev) => ({ ...prev, cpuLimit: e.target.value }))} />
+                <input className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100" value={form.cpuLimit} onChange={(e) => setForm((prev) => ({ ...prev, cpuLimit: e.target.value }))} />
               </label>
               <label className="text-sm font-medium text-slate-200">
                 Memória (MB)
-                <input className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100" value={form.memoryMb} onChange={(e) => setForm((prev) => ({ ...prev, memoryMb: e.target.value }))} />
+                <input className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100" value={form.memoryMb} onChange={(e) => setForm((prev) => ({ ...prev, memoryMb: e.target.value }))} />
               </label>
             </div>
             <label className="text-sm font-medium text-slate-200">
               Caminho do Dockerfile
-              <input className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100" value={form.dockerfilePath} onChange={(e) => setForm((prev) => ({ ...prev, dockerfilePath: e.target.value }))} />
+              <input className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100" value={form.dockerfilePath} onChange={(e) => setForm((prev) => ({ ...prev, dockerfilePath: e.target.value }))} />
             </label>
             <label className="text-sm font-medium text-slate-200">
               Comando de inicialização
-              <input className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-4 py-3 text-sm text-slate-100" value={form.startCommand} onChange={(e) => setForm((prev) => ({ ...prev, startCommand: e.target.value }))} placeholder="npm run start" />
+              <input className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950/80 px-3 py-2.5 text-sm text-slate-100" value={form.startCommand} onChange={(e) => setForm((prev) => ({ ...prev, startCommand: e.target.value }))} placeholder="npm run start" />
             </label>
             <div>
               <div className="mb-2 text-sm font-medium text-slate-200">Volumes</div>
@@ -580,7 +630,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
             {PIPELINE_STEPS.map((item, idx) => {
               const done = idx <= pipelineIndex
               return (
-                <div key={item} className={`rounded-xl border px-4 py-3 text-sm ${done ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-200' : 'border-slate-700 bg-slate-950/70 text-slate-400'}`}>
+                <div key={item} className={`rounded-xl border px-3 py-2.5 text-sm ${done ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-200' : 'border-slate-700 bg-slate-950/70 text-slate-400'}`}>
                   {`${done ? 'OK' : '...'} ${item}`}
                 </div>
               )
@@ -589,7 +639,7 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
         </SectionCard>
       ) : null}
 
-      <div className="sticky bottom-0 z-10 flex flex-wrap gap-2 rounded-2xl border border-slate-700/80 bg-slate-950/90 p-4 backdrop-blur">
+      <div className="sticky bottom-0 z-10 flex flex-wrap gap-2 rounded-xl border border-slate-700/80 bg-slate-950/90 p-4 backdrop-blur">
         <button className="rounded-xl border border-slate-600 px-4 py-2 text-sm text-slate-200 transition hover:border-slate-500" onClick={onCancel}>
           {t('action_close', 'Fechar')}
         </button>
@@ -612,3 +662,5 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onCrea
     </div>
   )
 }
+
+

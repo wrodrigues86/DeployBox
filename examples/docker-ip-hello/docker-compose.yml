@@ -1,0 +1,9 @@
+﻿services:
+  app:
+    build: .
+    container_name: deploybox-docker-ip-hello
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+    ports:
+      - "8088:3000"
