@@ -196,11 +196,13 @@ const DEFAULT_TRANSLATIONS = {
   action_restore: 'Restaurar',
   action_compare: 'Comparar',
   action_restart: 'Reiniciar',
+  menu_create_application: 'Criar Aplicação',
 }
 
 const sidebarItems = [
   { key: 'Dashboard', labelKey: 'menu_dashboard', fallback: 'Dashboard', icon: 'DB' },
   { key: 'Projetos', labelKey: 'menu_projects', fallback: 'Projetos', icon: 'PR' },
+  { key: 'CriarAplicacao', labelKey: 'menu_create_application', fallback: 'Criar Aplicação', icon: 'CA' },
   { key: 'SQL', labelKey: 'menu_sql', fallback: 'SQL', icon: 'SQ' },
   { key: 'Logs', labelKey: 'menu_logs', fallback: 'Logs', icon: 'LG' },
   { key: 'Configuracoes', labelKey: 'menu_settings', fallback: 'Configurações', icon: 'CF' },
@@ -208,6 +210,7 @@ const sidebarItems = [
 const defaultTabBySection = {
   Dashboard: null,
   Projetos: 'Código',
+  CriarAplicacao: null,
   SQL: null,
   Logs: null,
   Configuracoes: null,
@@ -272,7 +275,7 @@ export default function App() {
   const isProjectOnlyUser = !!me?.role && me.role !== 'full_admin'
   const currentSection = isProjectOnlyUser ? 'Projetos' : section
   const visibleSidebarItems = useMemo(
-    () => (isProjectOnlyUser ? sidebarItems.filter((item) => item.key === 'Projetos') : sidebarItems),
+    () => (isProjectOnlyUser ? sidebarItems.filter((item) => item.key === 'Projetos' || item.key === 'CriarAplicacao') : sidebarItems),
     [isProjectOnlyUser],
   )
 
@@ -389,7 +392,7 @@ export default function App() {
 
   useEffect(() => {
     if (!isProjectOnlyUser) return
-    if (section !== 'Projetos') setSection('Projetos')
+    if (section !== 'Projetos' && section !== 'CriarAplicacao') setSection('Projetos')
   }, [isProjectOnlyUser, section])
 
   useEffect(() => {
@@ -540,6 +543,23 @@ export default function App() {
           <AppSqlSection authHeaders={authHeaders} t={t} />
         ) : currentSection === 'Logs' ? (
           <AppLogsSection authHeaders={authHeaders} projects={projects} t={t} />
+        ) : currentSection === 'CriarAplicacao' ? (
+          <CreateApplicationSection
+            authHeaders={authHeaders}
+            loading={loading}
+            t={t}
+            onCreated={() => refreshProjects()}
+            onCreate={async (payload) => {
+              setLoading(true)
+              try {
+                const { data } = await api.post('/projects', payload, { headers: authHeaders, skipNotify: true })
+                await refreshProjects()
+                return data
+              } finally {
+                setLoading(false)
+              }
+            }}
+          />
         ) : (
           <div className="mt-6 space-y-5">
             {!projectDetailOpen ? (
@@ -1391,6 +1411,102 @@ function Card({ title, value }) {
   )
 }
 
+function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated }) {
+  async function handleDockerCreate(dockerPayload) {
+    const created = await onCreate({
+      name: dockerPayload.name,
+      slug: dockerPayload.slug,
+      description: dockerPayload.description,
+      type: 'docker',
+    })
+    if (!created?.id) return
+    const envPairs = [
+      ['DOCKER_HOST_PORT', String(dockerPayload.externalPort || '3000')],
+      ['DOCKER_CONTAINER_PORT', String(dockerPayload.internalPort || '3000')],
+      ['DOCKER_REPOSITORY', String(dockerPayload.repository || '')],
+      ['DOCKER_BRANCH', String(dockerPayload.branch || '')],
+      ['DOCKER_DOCKERFILE_PATH', String(dockerPayload.dockerfilePath || './Dockerfile')],
+      ['DOCKER_SUBDOMAIN', String(dockerPayload.subdomain || '')],
+      ['DOCKER_DOMAIN_BASE', String(dockerPayload.domainBase || '')],
+      ['DOCKER_ENABLE_SSL', dockerPayload.enableSSL ? '1' : '0'],
+      ['DOCKER_FORCE_HTTPS', dockerPayload.forceHTTPS ? '1' : '0'],
+    ]
+    await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${created.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders, skipNotify: true })))
+    const token = localStorage.getItem('nodepanel_github_token') || ''
+    if (dockerPayload.sourceType === 'github' && dockerPayload.repository && token) {
+      const repoUrl = dockerPayload.repository.startsWith('http') ? dockerPayload.repository : `https://github.com/${dockerPayload.repository}.git`
+      await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders, skipNotify: true })
+    }
+    if (dockerPayload.sourceType !== 'github') {
+      const template = String(dockerPayload.template || 'node')
+      const templateFiles = {
+        node: {
+          dockerfile: `FROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install --omit=dev || true\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"node\", \"app.js\"]\n`,
+          app: "const http = require('node:http');\nconst port = Number(process.env.PORT || 3000);\nhttp.createServer((_, res) => res.end('DeployBox Node OK')).listen(port);\n",
+          packageJson: '{\n  "name": "deploybox-node-app",\n  "private": true,\n  "version": "1.0.0"\n}\n',
+        },
+        php: {
+          dockerfile: `FROM php:8.2-apache\nWORKDIR /var/www/html\nCOPY . .\nRUN sed -i 's/Listen 80/Listen ${dockerPayload.internalPort || '3000'}/g' /etc/apache2/ports.conf && sed -i 's/:80>/:${dockerPayload.internalPort || '3000'}>/g' /etc/apache2/sites-available/000-default.conf\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"apache2-foreground\"]\n`,
+          app: "<?php echo 'DeployBox PHP OK';",
+        },
+        python: {
+          dockerfile: `FROM python:3.12-slim\nWORKDIR /app\nRUN pip install --no-cache-dir flask\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"python\", \"app.py\"]\n`,
+          app: "from flask import Flask\napp = Flask(__name__)\n@app.get('/')\ndef home(): return {'ok': True, 'app': 'DeployBox Python'}\napp.run(host='0.0.0.0', port=3000)\n",
+        },
+        nginx: {
+          dockerfile: `FROM nginx:alpine\nCOPY . /usr/share/nginx/html\nRUN sed -i 's/listen       80;/listen       ${dockerPayload.internalPort || '3000'};/g' /etc/nginx/conf.d/default.conf\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"nginx\", \"-g\", \"daemon off;\"]\n`,
+          app: '<h1>DeployBox Nginx OK</h1>',
+        },
+        dotnet: {
+          dockerfile: `FROM mcr.microsoft.com/dotnet/sdk:8.0\nWORKDIR /src\nRUN dotnet new web -n app\nWORKDIR /src/app\nENV ASPNETCORE_URLS=http://0.0.0.0:${dockerPayload.internalPort || '3000'}\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"dotnet\", \"run\", \"--no-launch-profile\", \"--urls\", \"http://0.0.0.0:${dockerPayload.internalPort || '3000'}\"]\n`,
+        },
+        mysql_phpmyadmin: {
+          dockerfile: `FROM phpmyadmin:apache\nENV PMA_HOST=127.0.0.1\nENV PMA_PORT=3306\nRUN apt-get update && apt-get install -y mariadb-server && rm -rf /var/lib/apt/lists/*\nRUN printf '#!/bin/sh\\nset -e\\nservice mariadb start\\nmysql -e \"CREATE DATABASE IF NOT EXISTS appdb;\" || true\\nexec apache2-foreground\\n' > /usr/local/bin/start-with-mysql.sh && chmod +x /usr/local/bin/start-with-mysql.sh\nEXPOSE ${dockerPayload.internalPort || '8080'}\nCMD [\"/usr/local/bin/start-with-mysql.sh\"]\n`,
+        },
+        blank: {
+          dockerfile: `FROM alpine:3.20\nCMD [\"sh\", \"-c\", \"echo DeployBox Blank Container && sleep infinity\"]\n`,
+        },
+      }[template] || {}
+      if (templateFiles.dockerfile) {
+        await api.put(`/projects/${created.id}/file`, { path: 'Dockerfile', content: templateFiles.dockerfile }, { headers: authHeaders, skipNotify: true })
+      }
+      if (template === 'node' && templateFiles.app) {
+        await api.put(`/projects/${created.id}/file`, { path: 'app.js', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
+        await api.put(`/projects/${created.id}/file`, { path: 'package.json', content: templateFiles.packageJson }, { headers: authHeaders, skipNotify: true })
+      }
+      if (template === 'php' && templateFiles.app) await api.put(`/projects/${created.id}/file`, { path: 'index.php', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
+      if (template === 'python' && templateFiles.app) await api.put(`/projects/${created.id}/file`, { path: 'app.py', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
+      if (template === 'nginx' && templateFiles.app) await api.put(`/projects/${created.id}/file`, { path: 'index.html', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
+    }
+    if (dockerPayload.mode === 'deploy') {
+      let dockerfileForDeploy = ''
+      try {
+        const fetchPath = String(dockerPayload.dockerfilePath || './Dockerfile').replace(/^\.\//, '') || 'Dockerfile'
+        const { data: fileResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: fetchPath } })
+        dockerfileForDeploy = String(fileResp?.content || '')
+      } catch (_) {}
+      if (!dockerfileForDeploy.trim()) {
+        const { data: fallbackResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: 'Dockerfile' } })
+        dockerfileForDeploy = String(fallbackResp?.content || '')
+      }
+      await api.post(`/projects/${created.id}/docker/run-dockerfile`, { dockerfile: dockerfileForDeploy, port: String(dockerPayload.externalPort || '3000'), containerPort: String(dockerPayload.internalPort || '3000') }, { headers: authHeaders, skipNotify: true })
+    }
+    notifyUi(dockerPayload.mode === 'deploy' ? 'Projeto Docker criado e deploy iniciado.' : 'Projeto Docker criado com sucesso.')
+    onCreated?.()
+  }
+
+  return (
+    <div className="mt-6">
+      <div className="card p-5 lg:p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold">{t('menu_create_application', 'Criar Aplicação')}</h2>
+        </div>
+        <DockerWizard authHeaders={authHeaders} t={t} loading={loading} onCancel={() => {}} onCreate={handleDockerCreate} />
+      </div>
+    </div>
+  )
+}
+
 function ProjectList({
   projects,
   selected,
@@ -1404,18 +1520,31 @@ function ProjectList({
   t,
 }) {
   const [createOpen, setCreateOpen] = useState(false)
+  const [dockerPageOpen, setDockerPageOpen] = useState(false)
   const [createSession, setCreateSession] = useState(0)
   const [search, setSearch] = useState('')
   const [dockerPorts, setDockerPorts] = useState({})
   const [form, setForm] = useState({ name: '', slug: '', description: '', type: 'api', worker_mode: 'manual' })
   const defaultCreateForm = { name: '', slug: '', description: '', type: 'api', worker_mode: 'manual' }
   function openCreateModal() {
+    setDockerPageOpen(false)
     setForm(defaultCreateForm)
     setCreateSession((v) => v + 1)
     setCreateOpen(true)
   }
   function closeCreateModal() {
     setCreateOpen(false)
+    setForm(defaultCreateForm)
+    setCreateSession((v) => v + 1)
+  }
+  function openDockerPage() {
+    setCreateOpen(false)
+    setDockerPageOpen(true)
+    setForm({ ...defaultCreateForm, type: 'docker' })
+    setCreateSession((v) => v + 1)
+  }
+  function closeDockerPage() {
+    setDockerPageOpen(false)
     setForm(defaultCreateForm)
     setCreateSession((v) => v + 1)
   }
@@ -1466,6 +1595,122 @@ function ProjectList({
       return `${window.location.protocol}//${window.location.hostname}:${port}`
     }
     return `${appBaseUrl}/${p.slug}`
+  }
+
+  async function handleDockerCreate(dockerPayload) {
+    const created = await onCreate({
+      name: dockerPayload.name,
+      slug: dockerPayload.slug,
+      description: dockerPayload.description,
+      type: 'docker',
+    })
+    if (!created?.id) return
+    const envPairs = [
+      ['DOCKER_HOST_PORT', String(dockerPayload.externalPort || '3000')],
+      ['DOCKER_CONTAINER_PORT', String(dockerPayload.internalPort || '3000')],
+      ['DOCKER_REPOSITORY', String(dockerPayload.repository || '')],
+      ['DOCKER_BRANCH', String(dockerPayload.branch || '')],
+      ['DOCKER_DOCKERFILE_PATH', String(dockerPayload.dockerfilePath || './Dockerfile')],
+      ['DOCKER_SUBDOMAIN', String(dockerPayload.subdomain || '')],
+      ['DOCKER_DOMAIN_BASE', String(dockerPayload.domainBase || '')],
+      ['DOCKER_ENABLE_SSL', dockerPayload.enableSSL ? '1' : '0'],
+      ['DOCKER_FORCE_HTTPS', dockerPayload.forceHTTPS ? '1' : '0'],
+    ]
+    await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${created.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders, skipNotify: true })))
+    const token = localStorage.getItem('nodepanel_github_token') || ''
+    if (dockerPayload.sourceType === 'github' && dockerPayload.repository && token) {
+      const repoUrl = dockerPayload.repository.startsWith('http') ? dockerPayload.repository : `https://github.com/${dockerPayload.repository}.git`
+      await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders, skipNotify: true })
+    }
+    if (dockerPayload.sourceType !== 'github') {
+      const template = String(dockerPayload.template || 'node')
+      const templateFiles = {
+        node: {
+          dockerfile: `FROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install --omit=dev || true\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"node\", \"app.js\"]\n`,
+          app: "const http = require('node:http');\nconst port = Number(process.env.PORT || 3000);\nhttp.createServer((_, res) => res.end('DeployBox Node OK')).listen(port);\n",
+          packageJson: '{\n  "name": "deploybox-node-app",\n  "private": true,\n  "version": "1.0.0"\n}\n',
+        },
+        php: {
+          dockerfile: `FROM php:8.2-apache\nWORKDIR /var/www/html\nCOPY . .\nRUN sed -i 's/Listen 80/Listen ${dockerPayload.internalPort || '3000'}/g' /etc/apache2/ports.conf && sed -i 's/:80>/:${dockerPayload.internalPort || '3000'}>/g' /etc/apache2/sites-available/000-default.conf\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"apache2-foreground\"]\n`,
+          app: "<?php echo 'DeployBox PHP OK';",
+        },
+        python: {
+          dockerfile: `FROM python:3.12-slim\nWORKDIR /app\nRUN pip install --no-cache-dir flask\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"python\", \"app.py\"]\n`,
+          app: "from flask import Flask\napp = Flask(__name__)\n@app.get('/')\ndef home(): return {'ok': True, 'app': 'DeployBox Python'}\napp.run(host='0.0.0.0', port=3000)\n",
+        },
+        nginx: {
+          dockerfile: `FROM nginx:alpine\nCOPY . /usr/share/nginx/html\nRUN sed -i 's/listen       80;/listen       ${dockerPayload.internalPort || '3000'};/g' /etc/nginx/conf.d/default.conf\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"nginx\", \"-g\", \"daemon off;\"]\n`,
+          app: '<h1>DeployBox Nginx OK</h1>',
+        },
+        dotnet: {
+          dockerfile: `FROM mcr.microsoft.com/dotnet/sdk:8.0\nWORKDIR /src\nRUN dotnet new web -n app\nWORKDIR /src/app\nENV ASPNETCORE_URLS=http://0.0.0.0:${dockerPayload.internalPort || '3000'}\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"dotnet\", \"run\", \"--no-launch-profile\", \"--urls\", \"http://0.0.0.0:${dockerPayload.internalPort || '3000'}\"]\n`,
+        },
+        mysql_phpmyadmin: {
+          dockerfile: `FROM phpmyadmin:apache\nENV PMA_HOST=127.0.0.1\nENV PMA_PORT=3306\nRUN apt-get update && apt-get install -y mariadb-server && rm -rf /var/lib/apt/lists/*\nRUN printf '#!/bin/sh\\nset -e\\nservice mariadb start\\nmysql -e \"CREATE DATABASE IF NOT EXISTS appdb;\" || true\\nexec apache2-foreground\\n' > /usr/local/bin/start-with-mysql.sh && chmod +x /usr/local/bin/start-with-mysql.sh\nEXPOSE ${dockerPayload.internalPort || '8080'}\nCMD [\"/usr/local/bin/start-with-mysql.sh\"]\n`,
+        },
+        blank: {
+          dockerfile: `FROM alpine:3.20\nCMD [\"sh\", \"-c\", \"echo DeployBox Blank Container && sleep infinity\"]\n`,
+        },
+      }[template] || {}
+      if (templateFiles.dockerfile) {
+        await api.put(`/projects/${created.id}/file`, { path: 'Dockerfile', content: templateFiles.dockerfile }, { headers: authHeaders, skipNotify: true })
+      }
+      if (template === 'node' && templateFiles.app) {
+        await api.put(`/projects/${created.id}/file`, { path: 'app.js', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
+        await api.put(`/projects/${created.id}/file`, { path: 'package.json', content: templateFiles.packageJson }, { headers: authHeaders, skipNotify: true })
+      }
+      if (template === 'php' && templateFiles.app) {
+        await api.put(`/projects/${created.id}/file`, { path: 'index.php', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
+      }
+      if (template === 'python' && templateFiles.app) {
+        await api.put(`/projects/${created.id}/file`, { path: 'app.py', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
+      }
+      if (template === 'nginx' && templateFiles.app) {
+        await api.put(`/projects/${created.id}/file`, { path: 'index.html', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
+      }
+    }
+    if (dockerPayload.mode === 'deploy') {
+      let dockerfileForDeploy = ''
+      try {
+        const fetchPath = String(dockerPayload.dockerfilePath || './Dockerfile').replace(/^\.\//, '') || 'Dockerfile'
+        const { data: fileResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: fetchPath } })
+        dockerfileForDeploy = String(fileResp?.content || '')
+      } catch (_) {}
+      if (!dockerfileForDeploy.trim()) {
+        const { data: fallbackResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: 'Dockerfile' } })
+        dockerfileForDeploy = String(fallbackResp?.content || '')
+      }
+      await api.post(
+        `/projects/${created.id}/docker/run-dockerfile`,
+        {
+          dockerfile: dockerfileForDeploy,
+          port: String(dockerPayload.externalPort || '3000'),
+          containerPort: String(dockerPayload.internalPort || '3000'),
+        },
+        { headers: authHeaders, skipNotify: true },
+      )
+    }
+    notifyUi(dockerPayload.mode === 'deploy' ? 'Projeto Docker criado e deploy iniciado.' : 'Projeto Docker criado com sucesso.')
+    closeDockerPage()
+  }
+
+  if (dockerPageOpen) {
+    return (
+      <div className="card p-5 lg:p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold">Criar Aplicação</h2>
+          <button className="btn px-2 py-1" onClick={closeDockerPage}>{t('action_close', 'Fechar')}</button>
+        </div>
+        <DockerWizard
+          key={createSession}
+          authHeaders={authHeaders}
+          t={t}
+          loading={loading}
+          onCancel={closeDockerPage}
+          onCreate={handleDockerCreate}
+        />
+      </div>
+    )
   }
 
   return (
@@ -1555,135 +1800,29 @@ function ProjectList({
                 <option value="api">API Project</option>
                 <option value="app">Node App Project</option>
                 <option value="worker">Worker Project</option>
-                <option value="docker">Docker Project</option>
               </select>
-              {form.type === 'docker' ? (
-                <DockerWizard
-                  key={createSession}
-                  authHeaders={authHeaders}
-                  t={t}
-                  loading={loading}
-                  onCancel={closeCreateModal}
-                  onCreate={async (dockerPayload) => {
-                    const created = await onCreate({
-                      name: dockerPayload.name,
-                      slug: dockerPayload.slug,
-                      description: dockerPayload.description,
-                      type: 'docker',
-                    })
-                    if (!created?.id) return
-                    const envPairs = [
-                      ['DOCKER_HOST_PORT', String(dockerPayload.externalPort || '3000')],
-                      ['DOCKER_CONTAINER_PORT', String(dockerPayload.internalPort || '3000')],
-                      ['DOCKER_REPOSITORY', String(dockerPayload.repository || '')],
-                      ['DOCKER_BRANCH', String(dockerPayload.branch || '')],
-                      ['DOCKER_DOCKERFILE_PATH', String(dockerPayload.dockerfilePath || './Dockerfile')],
-                      ['DOCKER_SUBDOMAIN', String(dockerPayload.subdomain || '')],
-                      ['DOCKER_DOMAIN_BASE', String(dockerPayload.domainBase || '')],
-                      ['DOCKER_ENABLE_SSL', dockerPayload.enableSSL ? '1' : '0'],
-                      ['DOCKER_FORCE_HTTPS', dockerPayload.forceHTTPS ? '1' : '0'],
-                    ]
-                    await Promise.all(envPairs.map(([envKey, envValue]) => api.post(`/projects/${created.id}/env`, { envKey, envValue, isSecret: false }, { headers: authHeaders, skipNotify: true })))
-                    const token = localStorage.getItem('nodepanel_github_token') || ''
-                    if (dockerPayload.sourceType === 'github' && dockerPayload.repository && token) {
-                      const repoUrl = dockerPayload.repository.startsWith('http') ? dockerPayload.repository : `https://github.com/${dockerPayload.repository}.git`
-                      await api.post(`/projects/${created.id}/clone-git`, { repoUrl, branch: dockerPayload.branch, token }, { headers: authHeaders, skipNotify: true })
-                    }
-                    if (dockerPayload.sourceType !== 'github') {
-                      const template = String(dockerPayload.template || 'node')
-                      const templateFiles = {
-                        node: {
-                          dockerfile: `FROM node:20-alpine\nWORKDIR /app\nCOPY package*.json ./\nRUN npm install --omit=dev || true\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"node\", \"app.js\"]\n`,
-                          app: "const http = require('node:http');\nconst port = Number(process.env.PORT || 3000);\nhttp.createServer((_, res) => res.end('DeployBox Node OK')).listen(port);\n",
-                          packageJson: '{\n  "name": "deploybox-node-app",\n  "private": true,\n  "version": "1.0.0"\n}\n',
-                        },
-                        php: {
-                          dockerfile: `FROM php:8.2-apache\nWORKDIR /var/www/html\nCOPY . .\nRUN sed -i 's/Listen 80/Listen ${dockerPayload.internalPort || '3000'}/g' /etc/apache2/ports.conf && sed -i 's/:80>/:${dockerPayload.internalPort || '3000'}>/g' /etc/apache2/sites-available/000-default.conf\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"apache2-foreground\"]\n`,
-                          app: "<?php echo 'DeployBox PHP OK';",
-                        },
-                        python: {
-                          dockerfile: `FROM python:3.12-slim\nWORKDIR /app\nRUN pip install --no-cache-dir flask\nCOPY . .\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"python\", \"app.py\"]\n`,
-                          app: "from flask import Flask\napp = Flask(__name__)\n@app.get('/')\ndef home(): return {'ok': True, 'app': 'DeployBox Python'}\napp.run(host='0.0.0.0', port=3000)\n",
-                        },
-                        nginx: {
-                          dockerfile: `FROM nginx:alpine\nCOPY . /usr/share/nginx/html\nRUN sed -i 's/listen       80;/listen       ${dockerPayload.internalPort || '3000'};/g' /etc/nginx/conf.d/default.conf\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"nginx\", \"-g\", \"daemon off;\"]\n`,
-                          app: '<h1>DeployBox Nginx OK</h1>',
-                        },
-                        dotnet: {
-                          dockerfile: `FROM mcr.microsoft.com/dotnet/sdk:8.0\nWORKDIR /src\nRUN dotnet new web -n app\nWORKDIR /src/app\nENV ASPNETCORE_URLS=http://0.0.0.0:${dockerPayload.internalPort || '3000'}\nEXPOSE ${dockerPayload.internalPort || '3000'}\nCMD [\"dotnet\", \"run\", \"--no-launch-profile\", \"--urls\", \"http://0.0.0.0:${dockerPayload.internalPort || '3000'}\"]\n`,
-                        },
-                        blank: {
-                          dockerfile: `FROM alpine:3.20\nCMD [\"sh\", \"-c\", \"echo DeployBox Blank Container && sleep infinity\"]\n`,
-                        },
-                      }[template] || {}
-                      if (templateFiles.dockerfile) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'Dockerfile', content: templateFiles.dockerfile }, { headers: authHeaders, skipNotify: true })
-                      }
-                      if (template === 'node' && templateFiles.app) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'app.js', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
-                        await api.put(`/projects/${created.id}/file`, { path: 'package.json', content: templateFiles.packageJson }, { headers: authHeaders, skipNotify: true })
-                      }
-                      if (template === 'php' && templateFiles.app) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'index.php', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
-                      }
-                      if (template === 'python' && templateFiles.app) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'app.py', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
-                      }
-                      if (template === 'nginx' && templateFiles.app) {
-                        await api.put(`/projects/${created.id}/file`, { path: 'index.html', content: templateFiles.app }, { headers: authHeaders, skipNotify: true })
-                      }
-                    }
-                    if (dockerPayload.mode === 'deploy') {
-                      let dockerfileForDeploy = ''
-                      try {
-                        const fetchPath = String(dockerPayload.dockerfilePath || './Dockerfile').replace(/^\.\//, '') || 'Dockerfile'
-                        const { data: fileResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: fetchPath } })
-                        dockerfileForDeploy = String(fileResp?.content || '')
-                      } catch (_) {}
-                      if (!dockerfileForDeploy.trim()) {
-                        const { data: fallbackResp } = await api.get(`/projects/${created.id}/file`, { headers: authHeaders, params: { path: 'Dockerfile' } })
-                        dockerfileForDeploy = String(fallbackResp?.content || '')
-                      }
-                      await api.post(
-                        `/projects/${created.id}/docker/run-dockerfile`,
-                        {
-                          dockerfile: dockerfileForDeploy,
-                          port: String(dockerPayload.externalPort || '3000'),
-                          containerPort: String(dockerPayload.internalPort || '3000'),
-                        },
-                        { headers: authHeaders, skipNotify: true },
-                      )
-                    }
-                    notifyUi(dockerPayload.mode === 'deploy' ? 'Projeto Docker criado e deploy iniciado.' : 'Projeto Docker criado com sucesso.')
-                    closeCreateModal()
-                  }}
-                />
+              <input className="input" placeholder={t('label_name', 'Nome')} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <input className="input" placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
+              <input className="input" placeholder={t('label_description', 'Descrição')} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+              {form.type === 'worker' ? (
+                <select className="input" value={form.worker_mode} onChange={(e) => setForm({ ...form, worker_mode: e.target.value })}>
+                  <option value="manual">manual</option>
+                  <option value="cron">cron</option>
+                  <option value="continuous">continuous</option>
+                </select>
               ) : (
-                <>
-                  <input className="input" placeholder={t('label_name', 'Nome')} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                  <input className="input" placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} />
-                  <input className="input" placeholder={t('label_description', 'Descrição')} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-                  {form.type === 'worker' ? (
-                    <select className="input" value={form.worker_mode} onChange={(e) => setForm({ ...form, worker_mode: e.target.value })}>
-                      <option value="manual">manual</option>
-                      <option value="cron">cron</option>
-                      <option value="continuous">continuous</option>
-                    </select>
-                  ) : (
-                    <div className="input flex items-center text-slate-400">runtime: default</div>
-                  )}
-                  <button
-                    className="btn w-full border-panel-accent text-panel-accent"
-                    disabled={loading}
-                    onClick={async () => {
-                      await onCreate(form)
-                      closeCreateModal()
-                    }}
-                  >
-                    {loading ? t('action_creating', 'Criando...') : t('action_create_project', 'Criar projeto')}
-                  </button>
-                </>
+                <div className="input flex items-center text-slate-400">runtime: default</div>
               )}
+              <button
+                className="btn w-full border-panel-accent text-panel-accent"
+                disabled={loading}
+                onClick={async () => {
+                  await onCreate(form)
+                  closeCreateModal()
+                }}
+              >
+                {loading ? t('action_creating', 'Criando...') : t('action_create_project', 'Criar projeto')}
+              </button>
             </div>
           </div>
         </div>
