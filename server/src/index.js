@@ -608,7 +608,7 @@ CMD ["npm", "start"]
       ),
     );
     zip.addFile(
-      'docker-compose.yml',
+      'docker compose.yml',
       Buffer.from(
         `services:
   app:
