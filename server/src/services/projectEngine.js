@@ -419,7 +419,7 @@ async function runDockerCompose(project, args = '', extraEnv = {}) {
   const composeEnv = { PROJECT_SLUG: safeSlug(project.slug), ...extraEnv };
   const dockerCli = resolveDockerCliPath();
   const command = `"${dockerCli}" compose ${String(args || '').trim()}`.trim();
-  const legacyCommand = `docker-compose ${String(args || '').trim()}`.trim();
+  const legacyCommand = `docker compose ${String(args || '').trim()}`.trim();
   try {
     return await runCommand(command, cwd, composeEnv);
   } catch (error) {

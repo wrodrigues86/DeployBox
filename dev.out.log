@@ -214,3 +214,26 @@
 [0] 
 [0] Node.js v25.4.0
 [0] Failed running 'src/index.js'. Waiting for file changes before restarting...
+[1] [2m20:50:54[22m [31m[1m[vite][22m[39m [31mws proxy error:[39m
+[1] Error: read ECONNRESET
+[1]     at TCP.onStreamRead (node:internal/stream_base_commons:216:20)
+[1] [2m20:50:56[22m [31m[1m[vite][22m[39m [31mws proxy error:[39m
+[1] AggregateError [ECONNREFUSED]: 
+[1]     at internalConnectMultiple (node:net:1134:18)
+[1]     at afterConnectMultiple (node:net:1715:7)
+[1] [2m20:51:00[22m [31m[1m[vite][22m[39m [31mws proxy error:[39m
+[1] AggregateError [ECONNREFUSED]: 
+[1]     at internalConnectMultiple (node:net:1134:18)
+[1]     at afterConnectMultiple (node:net:1715:7)
+[1] [2m20:51:01[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dashboard/stats[39m
+[1] AggregateError [ECONNREFUSED]: 
+[1]     at internalConnectMultiple (node:net:1134:18)
+[1]     at afterConnectMultiple (node:net:1715:7)
+[1] [2m20:51:06[22m [31m[1m[vite][22m[39m [31mws proxy error:[39m
+[1] AggregateError [ECONNREFUSED]: 
+[1]     at internalConnectMultiple (node:net:1134:18)
+[1]     at afterConnectMultiple (node:net:1715:7)
+[1] [2m20:51:06[22m [31m[1m[vite][22m[39m [31mhttp proxy error: /api/dashboard/stats[39m
+[1] AggregateError [ECONNREFUSED]: 
+[1]     at internalConnectMultiple (node:net:1134:18)
+[1]     at afterConnectMultiple (node:net:1715:7)
