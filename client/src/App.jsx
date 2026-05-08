@@ -692,8 +692,6 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
   const [templateSaving, setTemplateSaving] = useState(false)
   const [templateForm, setTemplateForm] = useState({ name: '', description: '', command: '' })
   const [templateUploadFile, setTemplateUploadFile] = useState(null)
-  const [installLogJob, setInstallLogJob] = useState(null)
-  const [installLogs, setInstallLogs] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [userDetailOpen, setUserDetailOpen] = useState(false)
   const [userSearch, setUserSearch] = useState('')
@@ -739,25 +737,6 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
     setTranslationJson(JSON.stringify(translations || {}, null, 2))
   }, [translations])
 
-  useEffect(() => {
-    if (!installLogJob) return
-    let active = true
-    const timer = setInterval(async () => {
-      try {
-        const { data } = await api.get(`/install-template/${installLogJob}/logs`, { headers: authHeaders })
-        if (!active) return
-        setInstallLogs(Array.isArray(data?.logs) ? data.logs : [])
-        const status = String(data?.status || '')
-        if (status === 'done' || status === 'failed') clearInterval(timer)
-      } catch (_) {
-        clearInterval(timer)
-      }
-    }, 1200)
-    return () => {
-      active = false
-      clearInterval(timer)
-    }
-  }, [installLogJob, authHeaders])
 
   function resetUserForm() {
     setEditingId(null)
@@ -947,18 +926,7 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                             <div className="truncate text-xs text-slate-400">{item.description}</div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          <button className="btn px-2 py-1 text-xs" onClick={async () => {
-                            try {
-                              const projectName = prompt('Nome da pasta do projeto:', item.slug)
-                              if (!projectName) return
-                              const { data } = await api.post('/install-template', { template: item.slug, projectName }, { headers: authHeaders })
-                              setInstallLogJob(data?.jobId || null)
-                              setInstallLogs([])
-                            } catch (err) {
-                              notifyUi(err?.response?.data?.error || 'Falha ao instalar template.', 'error')
-                            }
-                          }}>Instalar</button>
+                        <div className="grid grid-cols-2 gap-2">
                           <button className="btn px-2 py-1 text-xs" onClick={() => setTemplateForm({ name: item.name, description: item.description, command: item.command })}>Editar</button>
                           <button className="btn px-2 py-1 text-xs text-red-300 border-red-500/50" onClick={async () => {
                             await api.delete(`/templates/${item.slug}`, { headers: authHeaders })
@@ -969,10 +937,6 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                     ))}
                     {!appTemplates.length ? <div className="text-xs text-slate-400">Nenhum template cadastrado.</div> : null}
                   </div>
-                </div>
-                <div className="rounded-lg border border-panel-border bg-slate-950/30 p-3">
-                  <div className="mb-2 text-sm font-semibold">Logs de instalação</div>
-                  <pre className="w-full min-w-0 max-h-56 overflow-auto whitespace-pre-wrap break-all rounded-lg border border-panel-border bg-slate-950 p-2 text-xs">{installLogs.length ? installLogs.join('\n') : 'Sem logs no momento.'}</pre>
                 </div>
               </div>
             )}
