@@ -691,6 +691,7 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
   const [appTemplates, setAppTemplates] = useState([])
   const [templateSaving, setTemplateSaving] = useState(false)
   const [templateForm, setTemplateForm] = useState({ name: '', description: '', command: '' })
+  const [editingTemplateSlug, setEditingTemplateSlug] = useState('')
   const [templateUploadFile, setTemplateUploadFile] = useState(null)
   const [editingId, setEditingId] = useState(null)
   const [userDetailOpen, setUserDetailOpen] = useState(false)
@@ -889,18 +890,17 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                 </div>
                 <button
                   className="btn border-panel-accent text-panel-accent"
-                  disabled={templateSaving}
+                  disabled={templateSaving || !editingTemplateSlug}
                   onClick={async () => {
-                    const selected = appTemplates.find((item) => item.slug === templateForm.name.toLowerCase().replace(/\s+/g, '-'))
-                    if (!selected) return notifyUi('Para editar, use o slug no campo Nome.', 'error')
                     setTemplateSaving(true)
                     try {
-                      await api.put(`/templates/${selected.slug}`, {
+                      await api.put(`/templates/${editingTemplateSlug}`, {
                         name: templateForm.name,
                         description: templateForm.description,
                         command: templateForm.command,
                       }, { headers: authHeaders })
                       setTemplateForm({ name: '', description: '', command: '' })
+                      setEditingTemplateSlug('')
                       await loadAppTemplates()
                       notifyUi('Template atualizado com sucesso.', 'success')
                     } catch (err) {
@@ -910,7 +910,7 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                     }
                   }}
                 >
-                  {templateSaving ? 'Salvando...' : 'Salvar template'}
+                  {templateSaving ? 'Salvando...' : (editingTemplateSlug ? 'Salvar template' : 'Selecione um template para editar')}
                 </button>
                 <div className="rounded-lg border border-panel-border bg-slate-950/30 p-3">
                   <div className="mb-2 text-sm font-semibold">Templates cadastrados</div>
@@ -927,7 +927,10 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                          <button className="btn px-2 py-1 text-xs" onClick={() => setTemplateForm({ name: item.name, description: item.description, command: item.command })}>Editar</button>
+                          <button className="btn px-2 py-1 text-xs" onClick={() => {
+                            setEditingTemplateSlug(item.slug)
+                            setTemplateForm({ name: item.name, description: item.description, command: item.command })
+                          }}>Editar</button>
                           <button className="btn px-2 py-1 text-xs text-red-300 border-red-500/50" onClick={async () => {
                             await api.delete(`/templates/${item.slug}`, { headers: authHeaders })
                             await loadAppTemplates()
