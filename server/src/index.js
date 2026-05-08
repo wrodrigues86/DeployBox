@@ -289,6 +289,19 @@ function pushInstallLog(jobId, message) {
   job.updatedAt = nowIso();
 }
 
+function generateUniqueProjectSlug(baseSlug = 'app') {
+  const normalizedBase = normalizeTemplateSlug(baseSlug) || 'app';
+  for (let attempt = 0; attempt < 200; attempt += 1) {
+    const suffix = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
+    const candidate = normalizeTemplateSlug(`projeto-${normalizedBase}-${suffix}`);
+    if (!candidate) continue;
+    const candidateDir = path.join(projectsRootDir, candidate);
+    if (!fs.existsSync(candidateDir)) return candidate;
+  }
+  const fallback = normalizeTemplateSlug(`projeto-${normalizedBase}-${Date.now()}`) || `projeto-${Date.now()}`;
+  return fallback;
+}
+
 function getProjectById(id) {
   return db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
 }
@@ -1354,17 +1367,16 @@ app.delete('/api/templates/:slug', (req, res) => {
 app.post('/api/install-template', (req, res) => {
   if (!assertFullAdmin(req, res)) return;
   const templateSlug = normalizeTemplateSlug(req.body?.template);
-  const requestedProjectName = String(req.body?.projectName || '').trim();
   if (!templateSlug) return res.status(400).json({ error: 'template_required' });
   const template = listDockerTemplates().find((item) => item.slug === templateSlug);
   if (!template) return res.status(404).json({ error: 'template_not_found' });
 
-  const projectSlug = normalizeTemplateSlug(requestedProjectName || template.slug);
-  if (!projectSlug) return res.status(400).json({ error: 'project_name_invalid' });
+  const requestedProjectName = normalizeTemplateSlug(req.body?.projectName);
+  const projectBase = requestedProjectName || template.slug;
+  const projectSlug = generateUniqueProjectSlug(projectBase);
 
   fs.mkdirSync(projectsRootDir, { recursive: true });
   const targetProjectDir = path.join(projectsRootDir, projectSlug);
-  if (fs.existsSync(targetProjectDir)) return res.status(409).json({ error: 'project_dir_already_exists' });
   fs.mkdirSync(targetProjectDir, { recursive: true });
 
   const jobId = crypto.randomUUID();
@@ -1380,6 +1392,7 @@ app.post('/api/install-template', (req, res) => {
   installJobs.set(jobId, job);
 
   pushInstallLog(jobId, `🚀 Instalando ${template.name}...`);
+  pushInstallLog(jobId, `📁 Projeto criado: ${projectSlug}`);
   try {
     fs.cpSync(template.templateDir, targetProjectDir, { recursive: true });
     pushInstallLog(jobId, '📦 Template copiado para pasta de projeto.');
