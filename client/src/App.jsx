@@ -276,7 +276,7 @@ export default function App() {
   const isProjectOnlyUser = !!me?.role && me.role !== 'full_admin'
   const currentSection = isProjectOnlyUser ? 'Projetos' : section
   const visibleSidebarItems = useMemo(
-    () => (isProjectOnlyUser ? sidebarItems.filter((item) => item.key === 'Projetos' || item.key === 'CriarAplicacao') : sidebarItems),
+    () => (isProjectOnlyUser ? sidebarItems.filter((item) => item.key === 'Projetos') : sidebarItems),
     [isProjectOnlyUser],
   )
 
@@ -393,7 +393,7 @@ export default function App() {
 
   useEffect(() => {
     if (!isProjectOnlyUser) return
-    if (section !== 'Projetos' && section !== 'CriarAplicacao') setSection('Projetos')
+    if (section !== 'Projetos') setSection('Projetos')
   }, [isProjectOnlyUser, section])
 
   useEffect(() => {
@@ -690,7 +690,10 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
   const [users, setUsers] = useState([])
   const [appTemplates, setAppTemplates] = useState([])
   const [templateSaving, setTemplateSaving] = useState(false)
-  const [templateForm, setTemplateForm] = useState({ name: '', category: '', description: '', sourceType: 'git', gitUrl: '', composeText: '', iconDataUrl: '' })
+  const [templateForm, setTemplateForm] = useState({ name: '', description: '', command: '' })
+  const [templateUploadFile, setTemplateUploadFile] = useState(null)
+  const [installLogJob, setInstallLogJob] = useState(null)
+  const [installLogs, setInstallLogs] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [userDetailOpen, setUserDetailOpen] = useState(false)
   const [userSearch, setUserSearch] = useState('')
@@ -712,7 +715,7 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
 
   async function loadAppTemplates() {
     if (me?.role !== 'full_admin') return
-    const { data } = await api.get('/settings/app-templates', { headers: authHeaders })
+    const { data } = await api.get('/templates', { headers: authHeaders })
     setAppTemplates(Array.isArray(data) ? data : [])
   }
 
@@ -735,6 +738,26 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
   useEffect(() => {
     setTranslationJson(JSON.stringify(translations || {}, null, 2))
   }, [translations])
+
+  useEffect(() => {
+    if (!installLogJob) return
+    let active = true
+    const timer = setInterval(async () => {
+      try {
+        const { data } = await api.get(`/install-template/${installLogJob}/logs`, { headers: authHeaders })
+        if (!active) return
+        setInstallLogs(Array.isArray(data?.logs) ? data.logs : [])
+        const status = String(data?.status || '')
+        if (status === 'done' || status === 'failed') clearInterval(timer)
+      } catch (_) {
+        clearInterval(timer)
+      }
+    }, 1200)
+    return () => {
+      active = false
+      clearInterval(timer)
+    }
+  }, [installLogJob, authHeaders])
 
   function resetUserForm() {
     setEditingId(null)
@@ -845,55 +868,64 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
 
         {activeSettingsTab === 'templates' && (
           <div className="card p-4">
-            <h3 className="mb-3 text-lg font-semibold">Templates de Aplicacao</h3>
+            <h3 className="mb-3 text-lg font-semibold">Configurações &gt; Templates</h3>
             {me?.role !== 'full_admin' ? (
               <div className="rounded-lg border border-panel-border bg-slate-950/40 p-3 text-sm text-slate-300">
                 Apenas usuario full_admin pode gerenciar templates.
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="grid gap-2 md:grid-cols-2">
-                  <input className="input" placeholder="Nome do app" value={templateForm.name} onChange={(e) => setTemplateForm((p) => ({ ...p, name: e.target.value }))} />
-                  <input className="input" placeholder="Categoria (opcional)" value={templateForm.category} onChange={(e) => setTemplateForm((p) => ({ ...p, category: e.target.value }))} />
+                <div className="rounded-xl border border-panel-border bg-slate-950/40 p-3">
+                  <div className="mb-2 text-sm font-semibold">Upload Template (.zip)</div>
+                  <div className="grid gap-2 md:grid-cols-[1fr,auto]">
+                    <input type="file" accept=".zip" className="input" onChange={(e) => setTemplateUploadFile(e.target.files?.[0] || null)} />
+                    <button
+                      className="btn border-panel-accent text-panel-accent"
+                      disabled={templateSaving || !templateUploadFile}
+                      onClick={async () => {
+                        if (!templateUploadFile) return
+                        setTemplateSaving(true)
+                        try {
+                          const formData = new FormData()
+                          formData.append('file', templateUploadFile)
+                          await api.post('/templates/upload', formData, { headers: authHeaders })
+                          setTemplateUploadFile(null)
+                          await loadAppTemplates()
+                          notifyUi('Template enviado com sucesso.', 'success')
+                        } catch (err) {
+                          notifyUi(err?.response?.data?.error || 'Falha no upload do template.', 'error')
+                        } finally {
+                          setTemplateSaving(false)
+                        }
+                      }}
+                    >
+                      {templateSaving ? 'Enviando...' : 'Upload Template'}
+                    </button>
+                  </div>
                 </div>
-                <textarea className="input min-h-[80px]" placeholder="Descricao curta" value={templateForm.description} onChange={(e) => setTemplateForm((p) => ({ ...p, description: e.target.value }))} />
-                <div className="grid gap-2 md:grid-cols-[200px,1fr]">
-                  <select className="input" value={templateForm.sourceType} onChange={(e) => setTemplateForm((p) => ({ ...p, sourceType: e.target.value }))}>
-                    <option value="git">Repositorio Git</option>
-                    <option value="compose">Docker Compose (textarea)</option>
-                  </select>
-                  <input className="input" placeholder="https://github.com/user/repo.git" value={templateForm.gitUrl} onChange={(e) => setTemplateForm((p) => ({ ...p, gitUrl: e.target.value }))} />
-                </div>
-                {templateForm.sourceType === 'compose' && (
-                  <textarea className="input min-h-[160px] font-mono text-xs" placeholder="services:\n  app:\n    image: nginx:alpine" value={templateForm.composeText} onChange={(e) => setTemplateForm((p) => ({ ...p, composeText: e.target.value }))} />
-                )}
-                <div>
-                  <label className="mb-1 block text-xs text-slate-400">Imagem do app</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="input"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (!file) return
-                      const reader = new FileReader()
-                      reader.onload = () => setTemplateForm((p) => ({ ...p, iconDataUrl: String(reader.result || '') }))
-                      reader.readAsDataURL(file)
-                    }}
-                  />
+                <div className="grid gap-2 md:grid-cols-3">
+                  <input className="input" placeholder="Nome" value={templateForm.name} onChange={(e) => setTemplateForm((p) => ({ ...p, name: e.target.value }))} />
+                  <input className="input" placeholder="Descricao" value={templateForm.description} onChange={(e) => setTemplateForm((p) => ({ ...p, description: e.target.value }))} />
+                  <input className="input" placeholder="Comando" value={templateForm.command} onChange={(e) => setTemplateForm((p) => ({ ...p, command: e.target.value }))} />
                 </div>
                 <button
                   className="btn border-panel-accent text-panel-accent"
                   disabled={templateSaving}
                   onClick={async () => {
+                    const selected = appTemplates.find((item) => item.slug === templateForm.name.toLowerCase().replace(/\s+/g, '-'))
+                    if (!selected) return notifyUi('Para editar, use o slug no campo Nome.', 'error')
                     setTemplateSaving(true)
                     try {
-                      await api.post('/settings/app-templates', templateForm, { headers: authHeaders })
-                      setTemplateForm({ name: '', category: '', description: '', sourceType: 'git', gitUrl: '', composeText: '', iconDataUrl: '' })
+                      await api.put(`/templates/${selected.slug}`, {
+                        name: templateForm.name,
+                        description: templateForm.description,
+                        command: templateForm.command,
+                      }, { headers: authHeaders })
+                      setTemplateForm({ name: '', description: '', command: '' })
                       await loadAppTemplates()
-                      notifyUi('Template criado com sucesso.', 'success')
+                      notifyUi('Template atualizado com sucesso.', 'success')
                     } catch (err) {
-                      notifyUi(err?.response?.data?.error || 'Falha ao criar template.', 'error')
+                      notifyUi(err?.response?.data?.error || 'Falha ao atualizar template.', 'error')
                     } finally {
                       setTemplateSaving(false)
                     }
@@ -903,26 +935,44 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
                 </button>
                 <div className="rounded-lg border border-panel-border bg-slate-950/30 p-3">
                   <div className="mb-2 text-sm font-semibold">Templates cadastrados</div>
-                  <div className="space-y-2">
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {appTemplates.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between gap-3 rounded-md border border-panel-border px-3 py-2">
-                        <div className="min-w-0">
-                          <div className="text-sm font-medium">{item.name}</div>
-                          <div className="text-xs text-slate-400">{item.sourceType === 'compose' ? 'Compose' : item.gitUrl}</div>
+                      <div key={item.slug} className="rounded-xl border border-panel-border bg-slate-950/60 p-3">
+                        <div className="mb-2 flex items-center gap-3">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800">
+                            {item.iconDataUrl ? <img src={item.iconDataUrl} alt={item.name} className="h-8 w-8 object-contain" /> : <span>🐳</span>}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-medium">{item.name}</div>
+                            <div className="truncate text-xs text-slate-400">{item.description}</div>
+                          </div>
                         </div>
-                        <button
-                          className="btn px-2 py-1 text-xs text-red-300 border-red-500/50"
-                          onClick={async () => {
-                            await api.delete(`/settings/app-templates/${item.id}`, { headers: authHeaders })
+                        <div className="grid grid-cols-3 gap-2">
+                          <button className="btn px-2 py-1 text-xs" onClick={async () => {
+                            try {
+                              const projectName = prompt('Nome da pasta do projeto:', item.slug)
+                              if (!projectName) return
+                              const { data } = await api.post('/install-template', { template: item.slug, projectName }, { headers: authHeaders })
+                              setInstallLogJob(data?.jobId || null)
+                              setInstallLogs([])
+                            } catch (err) {
+                              notifyUi(err?.response?.data?.error || 'Falha ao instalar template.', 'error')
+                            }
+                          }}>Instalar</button>
+                          <button className="btn px-2 py-1 text-xs" onClick={() => setTemplateForm({ name: item.name, description: item.description, command: item.command })}>Editar</button>
+                          <button className="btn px-2 py-1 text-xs text-red-300 border-red-500/50" onClick={async () => {
+                            await api.delete(`/templates/${item.slug}`, { headers: authHeaders })
                             await loadAppTemplates()
-                          }}
-                        >
-                          Excluir
-                        </button>
+                          }}>Remover</button>
+                        </div>
                       </div>
                     ))}
                     {!appTemplates.length ? <div className="text-xs text-slate-400">Nenhum template cadastrado.</div> : null}
                   </div>
+                </div>
+                <div className="rounded-lg border border-panel-border bg-slate-950/30 p-3">
+                  <div className="mb-2 text-sm font-semibold">Logs de instalação</div>
+                  <pre className="w-full min-w-0 max-h-56 overflow-auto whitespace-pre-wrap break-all rounded-lg border border-panel-border bg-slate-950 p-2 text-xs">{installLogs.length ? installLogs.join('\n') : 'Sem logs no momento.'}</pre>
                 </div>
               </div>
             )}

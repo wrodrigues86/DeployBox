@@ -1,0 +1,6 @@
+{
+  "Name": ".NET 8",
+  "Description": "Template .NET 8 com Docker e volumes persistentes",
+  "icon": "icon.png",
+  "Command": "docker compose up -d --build"
+}

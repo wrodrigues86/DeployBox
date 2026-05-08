@@ -169,6 +169,126 @@ function sanitizeAppTemplate(row) {
   };
 }
 
+const templatesRootDir = path.resolve(appRootDir, '..', 'templates');
+const projectsRootDir = path.resolve(appRootDir, '..', 'projects');
+const templateRegistrySettingKey = 'docker_templates_registry_v1';
+const templateRequiredFields = ['Name', 'Description', 'icon', 'Command'];
+const installJobs = new Map();
+
+function slugifyName(value) {
+  return String(value || '')
+    .normalize('NFKD')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function normalizeTemplateSlug(value) {
+  const slug = slugifyName(value);
+  if (!slug) return null;
+  if (slug.includes('..')) return null;
+  return slug;
+}
+
+function parseJsonSafe(raw, fallback = null) {
+  try {
+    return JSON.parse(raw);
+  } catch (_) {
+    return fallback;
+  }
+}
+
+function readTemplateRegistry() {
+  const raw = getAppSetting(templateRegistrySettingKey, '[]');
+  const parsed = parseJsonSafe(raw, []);
+  return Array.isArray(parsed) ? parsed : [];
+}
+
+function writeTemplateRegistry(items) {
+  setAppSetting(templateRegistrySettingKey, JSON.stringify(items || []));
+}
+
+function ensureTemplatesRootDir() {
+  fs.mkdirSync(templatesRootDir, { recursive: true });
+}
+
+function sanitizeTemplateRecord(record) {
+  return {
+    slug: String(record?.slug || ''),
+    name: String(record?.name || ''),
+    description: String(record?.description || ''),
+    icon: String(record?.icon || ''),
+    command: String(record?.command || ''),
+    iconDataUrl: String(record?.iconDataUrl || ''),
+    templateDir: String(record?.templateDir || ''),
+    createdAt: String(record?.createdAt || nowIso()),
+    updatedAt: String(record?.updatedAt || nowIso()),
+  };
+}
+
+function readTemplateDefinitionFromDisk(slug) {
+  const safeSlug = normalizeTemplateSlug(slug);
+  if (!safeSlug) return null;
+  const templateDir = path.join(templatesRootDir, safeSlug);
+  const templateJsonPath = path.join(templateDir, 'template.json');
+  if (!fs.existsSync(templateJsonPath)) return null;
+  const templateJson = parseJsonSafe(fs.readFileSync(templateJsonPath, 'utf8'));
+  if (!templateJson || typeof templateJson !== 'object') return null;
+  const iconFile = String(templateJson.icon || '').trim();
+  const iconPath = path.join(templateDir, iconFile);
+  let iconDataUrl = '';
+  if (iconFile && fs.existsSync(iconPath)) {
+    const ext = path.extname(iconFile).toLowerCase();
+    const mime = ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : ext === '.svg' ? 'image/svg+xml' : 'image/png';
+    const b64 = fs.readFileSync(iconPath).toString('base64');
+    iconDataUrl = `data:${mime};base64,${b64}`;
+  }
+  return sanitizeTemplateRecord({
+    slug: safeSlug,
+    name: templateJson.Name,
+    description: templateJson.Description,
+    icon: iconFile,
+    command: templateJson.Command,
+    iconDataUrl,
+    templateDir,
+  });
+}
+
+function listDockerTemplates() {
+  ensureTemplatesRootDir();
+  const registry = readTemplateRegistry();
+  const bySlug = new Map(registry.map((item) => [String(item.slug || ''), item]));
+  const dirs = fs.readdirSync(templatesRootDir, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+  const items = [];
+  for (const dir of dirs) {
+    const slug = normalizeTemplateSlug(dir.name);
+    if (!slug) continue;
+    const current = readTemplateDefinitionFromDisk(slug);
+    if (!current) continue;
+    const existing = bySlug.get(slug) || {};
+    items.push(
+      sanitizeTemplateRecord({
+        ...existing,
+        ...current,
+        slug,
+        createdAt: existing.createdAt || nowIso(),
+        updatedAt: nowIso(),
+      }),
+    );
+  }
+  writeTemplateRegistry(items);
+  return items.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function pushInstallLog(jobId, message) {
+  const job = installJobs.get(jobId);
+  if (!job) return;
+  job.logs.push(`[${new Date().toISOString()}] ${message}`);
+  job.updatedAt = nowIso();
+}
+
 function getProjectById(id) {
   return db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
 }
@@ -1118,76 +1238,177 @@ app.put('/api/translations', (req, res) => {
   return res.json({ ok: true, locale, translations: getTranslationsFromDb(locale) });
 });
 
-app.get('/api/app-templates', (req, res) => {
-  const rows = db.prepare('SELECT * FROM app_templates WHERE active = 1 ORDER BY id DESC').all();
-  return res.json(rows.map(sanitizeAppTemplate));
+app.get('/api/templates', (req, res) => {
+  if (!assertFullAdmin(req, res)) return;
+  return res.json(listDockerTemplates());
 });
 
-app.get('/api/settings/app-templates', (req, res) => {
+app.post('/api/templates/upload', upload.single('file'), (req, res) => {
   if (!assertFullAdmin(req, res)) return;
-  const rows = db.prepare('SELECT * FROM app_templates ORDER BY id DESC').all();
-  return res.json(rows.map(sanitizeAppTemplate));
+  if (!req.file) return res.status(400).json({ error: 'template_zip_required' });
+  if (!String(req.file.originalname || '').toLowerCase().endsWith('.zip')) {
+    return res.status(400).json({ error: 'template_zip_invalid_extension' });
+  }
+
+  try {
+    const zip = new AdmZip(req.file.buffer);
+    const entries = zip.getEntries();
+    const normalizedNames = entries.map((entry) => String(entry.entryName || '').replace(/\\/g, '/'));
+    const topTemplatePrefix = normalizedNames.some((name) => name === 'template/' || name.startsWith('template/'));
+    if (!topTemplatePrefix) return res.status(400).json({ error: 'template_root_folder_required' });
+
+    for (const entryName of normalizedNames) {
+      const rel = path.posix.normalize(entryName);
+      if (!rel || rel.startsWith('../') || rel.includes('/../') || rel.startsWith('/')) {
+        return res.status(400).json({ error: `template_zip_invalid_path:${entryName}` });
+      }
+    }
+
+    const requiredEntries = [
+      'template/template.json',
+      'template/icon.png',
+      'template/Dockerfile',
+      'template/docker-compose.yml',
+      'template/.env',
+      'template/app/',
+      'template/database/',
+      'template/logs/',
+    ];
+    for (const requiredEntry of requiredEntries) {
+      const found = normalizedNames.some((name) => name === requiredEntry || name.startsWith(requiredEntry));
+      if (!found) return res.status(400).json({ error: `template_zip_missing:${requiredEntry}` });
+    }
+
+    const templateJsonEntry = zip.getEntry('template/template.json');
+    if (!templateJsonEntry) return res.status(400).json({ error: 'template_json_not_found' });
+    const templateJson = parseJsonSafe(templateJsonEntry.getData().toString('utf8'));
+    if (!templateJson || typeof templateJson !== 'object') return res.status(400).json({ error: 'template_json_invalid' });
+    for (const field of templateRequiredFields) {
+      if (!String(templateJson[field] || '').trim()) return res.status(400).json({ error: `template_json_field_required:${field}` });
+    }
+
+    const fallbackSlug = path.basename(String(req.file.originalname || ''), '.zip');
+    const slug = normalizeTemplateSlug(templateJson.Name) || normalizeTemplateSlug(fallbackSlug);
+    if (!slug) return res.status(400).json({ error: 'template_slug_invalid' });
+
+    ensureTemplatesRootDir();
+    const targetDir = path.join(templatesRootDir, slug);
+    if (fs.existsSync(targetDir)) fs.rmSync(targetDir, { recursive: true, force: true });
+    fs.mkdirSync(targetDir, { recursive: true });
+
+    for (const entry of entries) {
+      const normalized = path.posix.normalize(String(entry.entryName || '').replace(/\\/g, '/'));
+      if (!normalized || !normalized.startsWith('template/')) continue;
+      const relativePath = normalized.slice('template/'.length);
+      if (!relativePath) continue;
+      const targetPath = path.join(targetDir, relativePath);
+      const relCheck = path.relative(targetDir, targetPath);
+      if (relCheck.startsWith('..') || path.isAbsolute(relCheck)) continue;
+      if (entry.isDirectory) {
+        fs.mkdirSync(targetPath, { recursive: true });
+      } else {
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+        fs.writeFileSync(targetPath, entry.getData());
+      }
+    }
+
+    const updatedList = listDockerTemplates();
+    const created = updatedList.find((item) => item.slug === slug);
+    return res.status(201).json(created || { slug });
+  } catch (error) {
+    return res.status(400).json({ error: error.message || 'template_upload_failed' });
+  }
 });
 
-app.post('/api/settings/app-templates', (req, res) => {
+app.put('/api/templates/:slug', (req, res) => {
   if (!assertFullAdmin(req, res)) return;
-  const body = req.body || {};
-  const name = String(body.name || '').trim();
-  const category = String(body.category || '').trim();
-  const description = String(body.description || '').trim();
-  const iconDataUrl = String(body.iconDataUrl || '').trim();
-  const sourceType = String(body.sourceType || 'git').trim().toLowerCase();
-  const gitUrl = String(body.gitUrl || '').trim();
-  const composeText = String(body.composeText || '');
-  const active = body.active === undefined ? true : !!body.active;
-  if (!name) return res.status(400).json({ error: 'template_name_required' });
-  if (!['git', 'compose'].includes(sourceType)) return res.status(400).json({ error: 'template_source_type_invalid' });
-  if (sourceType === 'git' && !gitUrl) return res.status(400).json({ error: 'template_git_url_required' });
-  if (sourceType === 'compose' && !composeText.trim()) return res.status(400).json({ error: 'template_compose_required' });
-
-  const info = db.prepare(
-    `INSERT INTO app_templates
-      (name, category, description, icon_data_url, source_type, git_url, compose_text, active, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(name, category, description, iconDataUrl, sourceType, gitUrl, composeText, active ? 1 : 0, nowIso(), nowIso());
-  const created = db.prepare('SELECT * FROM app_templates WHERE id = ?').get(info.lastInsertRowid);
-  return res.status(201).json(sanitizeAppTemplate(created));
+  const slug = normalizeTemplateSlug(req.params.slug);
+  if (!slug) return res.status(400).json({ error: 'template_slug_invalid' });
+  const templateDir = path.join(templatesRootDir, slug);
+  const templateJsonPath = path.join(templateDir, 'template.json');
+  if (!fs.existsSync(templateJsonPath)) return res.status(404).json({ error: 'template_not_found' });
+  const payload = parseJsonSafe(fs.readFileSync(templateJsonPath, 'utf8'));
+  if (!payload || typeof payload !== 'object') return res.status(400).json({ error: 'template_json_invalid' });
+  if (req.body?.name !== undefined) payload.Name = String(req.body.name || '').trim();
+  if (req.body?.description !== undefined) payload.Description = String(req.body.description || '').trim();
+  if (req.body?.command !== undefined) payload.Command = String(req.body.command || '').trim();
+  for (const field of templateRequiredFields) {
+    if (!String(payload[field] || '').trim()) return res.status(400).json({ error: `template_json_field_required:${field}` });
+  }
+  fs.writeFileSync(templateJsonPath, JSON.stringify(payload, null, 2), 'utf8');
+  const updated = listDockerTemplates().find((item) => item.slug === slug);
+  return res.json(updated || { slug });
 });
 
-app.put('/api/settings/app-templates/:id', (req, res) => {
+app.delete('/api/templates/:slug', (req, res) => {
   if (!assertFullAdmin(req, res)) return;
-  const id = Number(req.params.id);
-  const current = db.prepare('SELECT * FROM app_templates WHERE id = ?').get(id);
-  if (!current) return res.status(404).json({ error: 'template_not_found' });
-  const body = req.body || {};
-  const next = {
-    name: body.name === undefined ? String(current.name || '') : String(body.name || '').trim(),
-    category: body.category === undefined ? String(current.category || '') : String(body.category || '').trim(),
-    description: body.description === undefined ? String(current.description || '') : String(body.description || '').trim(),
-    iconDataUrl: body.iconDataUrl === undefined ? String(current.icon_data_url || '') : String(body.iconDataUrl || '').trim(),
-    sourceType: body.sourceType === undefined ? String(current.source_type || 'git') : String(body.sourceType || '').trim().toLowerCase(),
-    gitUrl: body.gitUrl === undefined ? String(current.git_url || '') : String(body.gitUrl || '').trim(),
-    composeText: body.composeText === undefined ? String(current.compose_text || '') : String(body.composeText || ''),
-    active: body.active === undefined ? !!current.active : !!body.active,
-  };
-  if (!next.name) return res.status(400).json({ error: 'template_name_required' });
-  if (!['git', 'compose'].includes(next.sourceType)) return res.status(400).json({ error: 'template_source_type_invalid' });
-  if (next.sourceType === 'git' && !next.gitUrl) return res.status(400).json({ error: 'template_git_url_required' });
-  if (next.sourceType === 'compose' && !next.composeText.trim()) return res.status(400).json({ error: 'template_compose_required' });
-  db.prepare(
-    `UPDATE app_templates
-      SET name = ?, category = ?, description = ?, icon_data_url = ?, source_type = ?, git_url = ?, compose_text = ?, active = ?, updated_at = ?
-      WHERE id = ?`,
-  ).run(next.name, next.category, next.description, next.iconDataUrl, next.sourceType, next.gitUrl, next.composeText, next.active ? 1 : 0, nowIso(), id);
-  const updated = db.prepare('SELECT * FROM app_templates WHERE id = ?').get(id);
-  return res.json(sanitizeAppTemplate(updated));
-});
-
-app.delete('/api/settings/app-templates/:id', (req, res) => {
-  if (!assertFullAdmin(req, res)) return;
-  const id = Number(req.params.id);
-  db.prepare('DELETE FROM app_templates WHERE id = ?').run(id);
+  const slug = normalizeTemplateSlug(req.params.slug);
+  if (!slug) return res.status(400).json({ error: 'template_slug_invalid' });
+  const templateDir = path.join(templatesRootDir, slug);
+  if (!fs.existsSync(templateDir)) return res.status(404).json({ error: 'template_not_found' });
+  fs.rmSync(templateDir, { recursive: true, force: true });
+  listDockerTemplates();
   return res.json({ ok: true });
+});
+
+app.post('/api/install-template', (req, res) => {
+  if (!assertFullAdmin(req, res)) return;
+  const templateSlug = normalizeTemplateSlug(req.body?.template);
+  const requestedProjectName = String(req.body?.projectName || '').trim();
+  if (!templateSlug) return res.status(400).json({ error: 'template_required' });
+  const template = listDockerTemplates().find((item) => item.slug === templateSlug);
+  if (!template) return res.status(404).json({ error: 'template_not_found' });
+
+  const projectSlug = normalizeTemplateSlug(requestedProjectName || template.slug);
+  if (!projectSlug) return res.status(400).json({ error: 'project_name_invalid' });
+
+  fs.mkdirSync(projectsRootDir, { recursive: true });
+  const targetProjectDir = path.join(projectsRootDir, projectSlug);
+  if (fs.existsSync(targetProjectDir)) return res.status(409).json({ error: 'project_dir_already_exists' });
+  fs.mkdirSync(targetProjectDir, { recursive: true });
+
+  const jobId = crypto.randomUUID();
+  const job = {
+    id: jobId,
+    template: templateSlug,
+    project: projectSlug,
+    status: 'running',
+    logs: [],
+    createdAt: nowIso(),
+    updatedAt: nowIso(),
+  };
+  installJobs.set(jobId, job);
+
+  pushInstallLog(jobId, `🚀 Instalando ${template.name}...`);
+  try {
+    fs.cpSync(template.templateDir, targetProjectDir, { recursive: true });
+    pushInstallLog(jobId, '📦 Template copiado para pasta de projeto.');
+  } catch (copyError) {
+    job.status = 'failed';
+    pushInstallLog(jobId, `❌ Falha ao copiar template: ${copyError.message}`);
+    return res.status(500).json({ error: 'template_copy_failed', jobId });
+  }
+
+  const child = spawn(template.command, { cwd: targetProjectDir, shell: true });
+  child.stdout.on('data', (chunk) => pushInstallLog(jobId, `🐳 ${String(chunk).trim()}`));
+  child.stderr.on('data', (chunk) => pushInstallLog(jobId, `⚠️ ${String(chunk).trim()}`));
+  child.on('error', (error) => {
+    job.status = 'failed';
+    pushInstallLog(jobId, `❌ Falha na instalação: ${error.message}`);
+  });
+  child.on('close', (code) => {
+    job.status = code === 0 ? 'done' : 'failed';
+    pushInstallLog(jobId, code === 0 ? '✅ Instalação concluída.' : `❌ Instalação finalizada com código ${code}.`);
+  });
+
+  return res.status(202).json({ ok: true, jobId, template: templateSlug, project: projectSlug });
+});
+
+app.get('/api/install-template/:jobId/logs', (req, res) => {
+  if (!assertFullAdmin(req, res)) return;
+  const job = installJobs.get(String(req.params.jobId || ''));
+  if (!job) return res.status(404).json({ error: 'install_job_not_found' });
+  return res.json(job);
 });
 
 app.get('/api/templates/project-zip', (req, res) => {
@@ -1323,8 +1544,8 @@ app.get('/api/projects', (req, res) => {
 
 app.post('/api/projects', async (req, res) => {
   try {
+    if (!assertFullAdmin(req, res)) return;
     const data = req.body || {};
-    const isAdmin = isFullAdmin(req);
     if (!assertWithinStorageLimit(req, res, 64 * 1024)) return;
     const slug = String(data.slug || '').toLowerCase().replace(/[^a-z0-9-_]/g, '');
     if (!slug) return res.status(400).json({ error: 'slug_invalido' });
@@ -2264,6 +2485,7 @@ app.post('/api/projects/:id/code', async (req, res) => {
 });
 
 app.post('/api/projects/:id/upload-zip', upload.single('file'), async (req, res) => {
+  if (!assertFullAdmin(req, res)) return;
   const project = getProjectById(Number(req.params.id));
   if (!project) return res.status(404).json({ error: 'Projeto não encontrado' });
   if (!assertProjectAccess(req, res, project.id)) return;

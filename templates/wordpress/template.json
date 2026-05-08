@@ -1,0 +1,6 @@
+{
+  "Name": "WordPress",
+  "Description": "Template WordPress com MySQL e volumes persistentes",
+  "icon": "icon.png",
+  "Command": "docker compose up -d"
+}

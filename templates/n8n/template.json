@@ -1,0 +1,6 @@
+{
+  "Name": "n8n",
+  "Description": "Template n8n com persistência de dados",
+  "icon": "icon.png",
+  "Command": "docker compose up -d"
+}
