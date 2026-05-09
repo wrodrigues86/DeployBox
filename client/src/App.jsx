@@ -592,7 +592,7 @@ export default function App() {
                   }
                 }}
                 onToggle={async (project) => {
-                  await api.post(`/projects/${project.id}/toggle`, {}, { headers: authHeaders })
+                  await api.post(`/projects/${project.id}/toggle`, {}, { headers: { ...authHeaders, 'x-action-source': 'ui_project_list_toggle' } })
                   await refreshProjects(project.id)
                 }}
                 onDelete={async (project) => {
@@ -1794,7 +1794,7 @@ function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated
         dockerfileForDeploy = String(fallbackResp?.content || '')
       }
       try {
-        await api.post(`/projects/${created.id}/docker/run-dockerfile`, { dockerfile: dockerfileForDeploy, port: String(dockerPayload.externalPort || '3000'), containerPort: String(dockerPayload.internalPort || '3000') }, { headers: authHeaders, skipNotify: true })
+        await api.post(`/projects/${created.id}/docker/run-dockerfile`, { dockerfile: dockerfileForDeploy, port: String(dockerPayload.externalPort || '3000'), containerPort: String(dockerPayload.internalPort || '3000'), source: 'ui_create_application_deploy' }, { headers: authHeaders, skipNotify: true })
       } catch (err) {
         throw new Error(err?.response?.data?.error || 'Falha ao executar deploy do Dockerfile.')
       }
@@ -2054,6 +2054,7 @@ function ProjectList({
             dockerfile: dockerfileForDeploy,
             port: String(dockerPayload.externalPort || '3000'),
             containerPort: String(dockerPayload.internalPort || '3000'),
+            source: 'ui_project_list_create_deploy',
           },
           { headers: authHeaders, skipNotify: true },
         )

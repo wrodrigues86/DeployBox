@@ -479,6 +479,12 @@ function assertProjectAccess(req, res, projectId) {
   return true;
 }
 
+function readActionSource(req, fallback = 'unknown') {
+  const bodySource = String(req.body?.source || '').trim();
+  const headerSource = String(req.headers['x-action-source'] || '').trim();
+  return bodySource || headerSource || fallback;
+}
+
 function getDirectorySizeBytes(dir) {
   if (!dir || !fs.existsSync(dir)) return 0;
   let total = 0;
@@ -2075,6 +2081,7 @@ app.post('/api/projects/:id/restart', async (req, res) => {
   const project = getProjectById(Number(req.params.id));
   if (!project) return res.status(404).json({ error: 'Projeto não encontrado' });
   if (!assertProjectAccess(req, res, project.id)) return;
+  const source = readActionSource(req, 'api_restart');
 
   if (project.type === 'docker') {
     await stopDockerProject(project);
@@ -2082,15 +2089,16 @@ app.post('/api/projects/:id/restart', async (req, res) => {
     stopContinuousWorker(project.id);
   }
   await bootProjectRuntime(project);
-  addLog(project.id, 'info', 'Projeto reiniciado');
+  addLog(project.id, 'info', `Projeto reiniciado (source=${source})`);
 
-  return res.json({ ok: true });
+  return res.json({ ok: true, source });
 });
 
 app.post('/api/projects/:id/toggle', async (req, res) => {
   const project = getProjectById(Number(req.params.id));
   if (!project) return res.status(404).json({ error: 'Projeto não encontrado' });
   if (!assertProjectAccess(req, res, project.id)) return;
+  const source = readActionSource(req, 'api_toggle');
 
   const active = project.active ? 0 : 1;
   db.prepare('UPDATE projects SET active = ?, updated_at = ? WHERE id = ?').run(active, nowIso(), project.id);
@@ -2105,6 +2113,7 @@ app.post('/api/projects/:id/toggle', async (req, res) => {
   } else {
     await bootProjectRuntime(updated);
   }
+  addLog(project.id, 'info', `Projeto alternado para ${updated.active ? 'ativo' : 'inativo'} (source=${source})`);
 
   res.json(sanitizeProject(updated));
 });
@@ -2181,6 +2190,7 @@ app.post('/api/projects/:id/docker/run-dockerfile', async (req, res) => {
   if (project.type !== 'docker') return res.status(400).json({ error: 'Projeto não é do tipo docker' });
 
   const dockerfile = String(req.body?.dockerfile || '');
+  const source = readActionSource(req, 'api_docker_run_dockerfile');
   const portRaw = String(req.body?.port || '3000').trim();
   const containerPortRaw = String(req.body?.containerPort || '3000').trim();
   if (!dockerfile.trim()) return res.status(400).json({ error: 'dockerfile_required' });
@@ -2242,7 +2252,7 @@ app.post('/api/projects/:id/docker/run-dockerfile', async (req, res) => {
     const run = await runExec(`"${dockerCli}" run -d --name ${containerName} -p ${hostPort}:${containerPort} ${imageName}`);
     logs.push(run.stdout, run.stderr);
 
-    addLog(project.id, 'info', `Dockerfile executado: build+run ${hostPort}->${containerPort}`);
+    addLog(project.id, 'info', `Dockerfile executado: build+run ${hostPort}->${containerPort} (source=${source})`);
     return res.json({
       ok: true,
       image: imageName,
@@ -2252,7 +2262,7 @@ app.post('/api/projects/:id/docker/run-dockerfile', async (req, res) => {
       output: logs.filter(Boolean).join('\n').trim(),
     });
   } catch (error) {
-    addLog(project.id, 'error', `Falha ao executar Dockerfile: ${error.message}`);
+    addLog(project.id, 'error', `Falha ao executar Dockerfile (source=${source}): ${error.message}`);
     return res.status(400).json({ error: error.message || 'dockerfile_run_failed' });
   }
 });

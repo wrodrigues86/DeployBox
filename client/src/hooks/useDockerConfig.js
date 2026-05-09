@@ -99,26 +99,26 @@ export default function useDockerConfig(project, authHeaders) {
 
   const handleBuild = useCallback((nextConfig) => withAction('build', async () => {
     const payload = { dockerfile: String(nextConfig?.dockerfile || config?.dockerfile || ''), port: String(nextConfig?.externalPort || config?.externalPort || '3000'), containerPort: String(nextConfig?.internalPort || config?.internalPort || '3000') }
-    const { data } = await api.post(`/projects/${project.id}/docker/run-dockerfile`, payload, { headers: authHeaders, skipNotify: true })
+    const { data } = await api.post(`/projects/${project.id}/docker/run-dockerfile`, payload, { headers: { ...authHeaders, 'x-action-source': 'ui_docker_build' }, skipNotify: true })
     setLogsOutput(String(data?.output || 'build_ok'))
     notify('Build Docker concluído.')
     return data
   }), [project?.id, authHeaders, withAction, config])
 
   const handleRun = useCallback(() => withAction('run', async () => {
-    const { data } = await api.post(`/projects/${project.id}/toggle`, {}, { headers: authHeaders, skipNotify: true })
+    const { data } = await api.post(`/projects/${project.id}/toggle`, {}, { headers: { ...authHeaders, 'x-action-source': 'ui_docker_run' }, skipNotify: true })
     notify('Projeto iniciado.')
     return data
   }), [project?.id, authHeaders, withAction])
 
   const handleStop = useCallback(() => withAction('stop', async () => {
-    const { data } = await api.post(`/projects/${project.id}/toggle`, {}, { headers: authHeaders, skipNotify: true })
+    const { data } = await api.post(`/projects/${project.id}/toggle`, {}, { headers: { ...authHeaders, 'x-action-source': 'ui_docker_stop' }, skipNotify: true })
     notify('Projeto parado.')
     return data
   }), [project?.id, authHeaders, withAction])
 
   const handleRestart = useCallback(() => withAction('restart', async () => {
-    const { data } = await api.post(`/projects/${project.id}/restart`, {}, { headers: authHeaders, skipNotify: true })
+    const { data } = await api.post(`/projects/${project.id}/restart`, {}, { headers: { ...authHeaders, 'x-action-source': 'ui_docker_restart' }, skipNotify: true })
     notify('Projeto reiniciado.')
     return data
   }), [project?.id, authHeaders, withAction])
