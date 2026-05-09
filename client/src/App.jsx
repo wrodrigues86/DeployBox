@@ -704,6 +704,14 @@ function AppSettingsSection({ authHeaders, token, projects, me, t, activeSetting
   const [sshOutput, setSshOutput] = useState('')
   const [sshInput, setSshInput] = useState('')
   const [sshStatus, setSshStatus] = useState('')
+  const [sshForm, setSshForm] = useState({
+    host: '',
+    port: '22',
+    username: '',
+    password: '',
+    privateKey: '',
+    passphrase: '',
+  })
   const sshSocketRef = useRef(null)
   const sshOutputRef = useRef(null)
 
@@ -1295,6 +1303,17 @@ function AppSettingsSection({ authHeaders, token, projects, me, t, activeSetting
               </div>
             ) : (
               <div className="space-y-3">
+                <div className="grid gap-2 md:grid-cols-3">
+                  <input className="input" placeholder="SSH_HOST (ex: 1.2.3.4)" value={sshForm.host} onChange={(e) => setSshForm((p) => ({ ...p, host: e.target.value }))} />
+                  <input className="input" placeholder="SSH_PORT (22)" value={sshForm.port} onChange={(e) => setSshForm((p) => ({ ...p, port: e.target.value.replace(/[^\d]/g, '') }))} />
+                  <input className="input" placeholder="SSH_USERNAME" value={sshForm.username} onChange={(e) => setSshForm((p) => ({ ...p, username: e.target.value }))} />
+                </div>
+                <div className="grid gap-2 md:grid-cols-2">
+                  <input className="input" type="password" placeholder="SSH_PASSWORD (opcional)" value={sshForm.password} onChange={(e) => setSshForm((p) => ({ ...p, password: e.target.value }))} />
+                  <input className="input" type="password" placeholder="SSH_PASSPHRASE (opcional)" value={sshForm.passphrase} onChange={(e) => setSshForm((p) => ({ ...p, passphrase: e.target.value }))} />
+                </div>
+                <textarea className="input min-h-[120px] font-mono text-xs" placeholder={'SSH_PRIVATE_KEY (opcional)\n-----BEGIN OPENSSH PRIVATE KEY-----\n...'} value={sshForm.privateKey} onChange={(e) => setSshForm((p) => ({ ...p, privateKey: e.target.value }))} />
+                <div className="text-xs text-slate-400">Campos temporários: usados só nesta conexão e não são salvos.</div>
                 <div className="flex flex-wrap gap-2">
                   <button
                     className="btn border-emerald-500 text-emerald-300"
@@ -1305,6 +1324,14 @@ function AppSettingsSection({ authHeaders, token, projects, me, t, activeSetting
                         token,
                         cols: 140,
                         rows: 36,
+                        ssh: {
+                          host: String(sshForm.host || '').trim(),
+                          port: String(sshForm.port || '22').trim() || '22',
+                          username: String(sshForm.username || '').trim(),
+                          password: String(sshForm.password || ''),
+                          privateKey: String(sshForm.privateKey || ''),
+                          passphrase: String(sshForm.passphrase || ''),
+                        },
                       })
                     }}
                     disabled={sshConnected}

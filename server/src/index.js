@@ -161,7 +161,7 @@ io.on('connection', (socket) => {
     sshClient = null;
   }
 
-  socket.on('ssh:start', ({ token, cols, rows } = {}) => {
+  socket.on('ssh:start', ({ token, cols, rows, ssh } = {}) => {
     try {
       const user = verifyToken(String(token || '').trim());
       if (user?.role !== 'full_admin') {
@@ -173,23 +173,23 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const host = String(process.env.SSH_HOST || '').trim();
-    const username = String(process.env.SSH_USERNAME || '').trim();
-    const password = String(process.env.SSH_PASSWORD || '').trim();
-    const privateKeyRaw = String(process.env.SSH_PRIVATE_KEY || '');
-    const passphrase = String(process.env.SSH_PASSPHRASE || '').trim();
-    const portValue = Number(process.env.SSH_PORT || 22);
+    const host = String(ssh?.host || process.env.SSH_HOST || '').trim();
+    const username = String(ssh?.username || process.env.SSH_USERNAME || '').trim();
+    const password = String(ssh?.password || process.env.SSH_PASSWORD || '').trim();
+    const privateKeyRaw = String(ssh?.privateKey || process.env.SSH_PRIVATE_KEY || '');
+    const passphrase = String(ssh?.passphrase || process.env.SSH_PASSPHRASE || '').trim();
+    const portValue = Number(ssh?.port || process.env.SSH_PORT || 22);
     const port = Number.isFinite(portValue) && portValue > 0 ? portValue : 22;
 
     if (!host || !username) {
-      socket.emit('ssh:error', { message: 'Configure SSH_HOST e SSH_USERNAME no .env.' });
+      socket.emit('ssh:error', { message: 'Informe HOST e USERNAME para conectar.' });
       return;
     }
 
     const privateKey = privateKeyRaw.includes('\\n') ? privateKeyRaw.replace(/\\n/g, '\n') : privateKeyRaw;
 
     if (!password && !privateKey.trim()) {
-      socket.emit('ssh:error', { message: 'Configure SSH_PRIVATE_KEY ou SSH_PASSWORD no .env.' });
+      socket.emit('ssh:error', { message: 'Informe PRIVATE KEY ou PASSWORD para conectar.' });
       return;
     }
 
@@ -328,6 +328,19 @@ function parseJsonSafe(raw, fallback = null) {
   } catch (_) {
     return fallback;
   }
+}
+
+function detectPortsFromComposeText(composeText = '') {
+  const text = String(composeText || '');
+  const mappingMatches = [...text.matchAll(/["']?(\d{2,5})\s*:\s*(\d{2,5})["']?/g)];
+  if (mappingMatches.length) {
+    const hostPort = Number(mappingMatches[0][1]);
+    const containerPort = Number(mappingMatches[0][2]);
+    if (hostPort >= 1 && hostPort <= 65535 && containerPort >= 1 && containerPort <= 65535) {
+      return { hostPort: String(hostPort), containerPort: String(containerPort) };
+    }
+  }
+  return { hostPort: '3000', containerPort: '3000' };
 }
 
 function readTemplateRegistry() {
@@ -1569,6 +1582,17 @@ app.post('/api/install-template', (req, res) => {
   try {
     fs.cpSync(template.templateDir, targetProjectDir, { recursive: true });
     pushInstallLog(jobId, '📦 Template copiado para pasta de projeto.');
+    const composePath = path.join(targetProjectDir, 'docker-compose.yml');
+    if (fs.existsSync(composePath)) {
+      const composeText = fs.readFileSync(composePath, 'utf8');
+      const { hostPort, containerPort } = detectPortsFromComposeText(composeText);
+      db.prepare('INSERT INTO project_env (project_id, env_key, env_value, is_secret, updated_at) VALUES (?, ?, ?, 0, ?) ON CONFLICT(project_id, env_key) DO UPDATE SET env_value = excluded.env_value, updated_at = excluded.updated_at')
+        .run(createdProject.id, 'DOCKER_HOST_PORT', hostPort, nowIso());
+      db.prepare('INSERT INTO project_env (project_id, env_key, env_value, is_secret, updated_at) VALUES (?, ?, ?, 0, ?) ON CONFLICT(project_id, env_key) DO UPDATE SET env_value = excluded.env_value, updated_at = excluded.updated_at')
+        .run(createdProject.id, 'DOCKER_CONTAINER_PORT', containerPort, nowIso());
+      persistEnvFile(createdProject);
+      pushInstallLog(jobId, `🔌 Portas detectadas: ${hostPort}->${containerPort}`);
+    }
   } catch (copyError) {
     job.status = 'failed';
     db.prepare('UPDATE projects SET status = ?, updated_at = ? WHERE id = ?').run('error', nowIso(), job.projectId);
