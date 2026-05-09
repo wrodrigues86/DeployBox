@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import cron from 'node-cron';
-import { exec } from 'node:child_process';
+import { exec, execFile } from 'node:child_process';
 import Database from 'better-sqlite3';
 import { db, nowIso } from './database.js';
 import { addLog } from './logger.js';
@@ -404,6 +404,15 @@ function runCommand(command, cwd, env = {}) {
   });
 }
 
+function runCommandFile(bin, args, cwd, env = {}) {
+  return new Promise((resolve, reject) => {
+    execFile(bin, args, { cwd, env: { ...process.env, ...env } }, (error, stdout, stderr) => {
+      if (error) return reject(new Error(stderr || stdout || error.message));
+      resolve({ stdout, stderr });
+    });
+  });
+}
+
 function dockerImageName(project) {
   return `deploybox-${safeSlug(project.slug)}:latest`;
 }
@@ -427,14 +436,24 @@ function normalizeDockerComposeFile(project) {
 async function runDockerCompose(project, args = '', extraEnv = {}) {
   const cwd = projectPath(project.slug);
   const composeEnv = { PROJECT_SLUG: safeSlug(project.slug), ...extraEnv };
-  const dockerCli = resolveDockerCliPath();
-  const command = `"${dockerCli}" compose ${String(args || '').trim()}`.trim();
-  const legacyCommand = `docker compose ${String(args || '').trim()}`.trim();
-  try {
-    return await runCommand(command, cwd, composeEnv);
-  } catch (error) {
-    return runCommand(legacyCommand, cwd, composeEnv);
+  const dockerCli = String(resolveDockerCliPath() || 'docker').trim();
+  const dockerBin = dockerCli.split(/\s+/)[0] || 'docker';
+  const composeArgs = String(args || '').trim().split(/\s+/).filter(Boolean);
+
+  const attempts = [
+    () => runCommandFile(dockerBin, ['compose', ...composeArgs], cwd, composeEnv),
+    () => runCommandFile('docker', ['compose', ...composeArgs], cwd, composeEnv),
+    () => runCommandFile('docker-compose', composeArgs, cwd, composeEnv),
+  ];
+  let lastError = null;
+  for (const attempt of attempts) {
+    try {
+      return await attempt();
+    } catch (error) {
+      lastError = error;
+    }
   }
+  throw lastError || new Error('docker_compose_command_failed');
 }
 
 export async function startDockerProject(project) {
@@ -442,6 +461,7 @@ export async function startDockerProject(project) {
   normalizeDockerComposeFile(project);
   const env = loadEnv(project.id, project.slug);
   const dockerCli = resolveDockerCliPath();
+  const dockerBin = String(dockerCli || 'docker').trim().split(/\s+/)[0] || 'docker';
   const cwd = projectPath(project.slug);
   const imageName = dockerImageName(project);
   const containerName = dockerContainerName(project);
@@ -449,13 +469,13 @@ export async function startDockerProject(project) {
   const containerPort = String(env.DOCKER_CONTAINER_PORT || '3000');
 
   try {
-    await runCommand(`"${dockerCli}" image inspect ${imageName}`, cwd);
+    await runCommandFile(dockerBin, ['image', 'inspect', imageName], cwd);
     try {
-      await runCommand(`"${dockerCli}" rm -f ${containerName}`, cwd);
+      await runCommandFile(dockerBin, ['rm', '-f', containerName], cwd);
     } catch (_) {
       // ignore
     }
-    await runCommand(`"${dockerCli}" run -d --name ${containerName} -p ${hostPort}:${containerPort} ${imageName}`, cwd);
+    await runCommandFile(dockerBin, ['run', '-d', '--name', containerName, '-p', `${hostPort}:${containerPort}`, imageName], cwd);
     setProjectStatus(project.id, 'running');
     addLog(project.id, 'info', `Container Docker iniciado (docker run ${hostPort}:${containerPort})`);
     return;
@@ -473,6 +493,7 @@ export async function startDockerProject(project) {
 export async function stopDockerProject(project, removeVolumes = false) {
   const downArgs = removeVolumes ? 'down -v' : 'down';
   const dockerCli = resolveDockerCliPath();
+  const dockerBin = String(dockerCli || 'docker').trim().split(/\s+/)[0] || 'docker';
   const containerName = `deploybox-${safeSlug(project.slug)}`;
   const cwd = projectPath(project.slug);
   try {
@@ -483,7 +504,7 @@ export async function stopDockerProject(project, removeVolumes = false) {
   }
 
   try {
-    await runCommand(`"${dockerCli}" rm -f ${containerName}`, cwd);
+    await runCommandFile(dockerBin, ['rm', '-f', containerName], cwd);
     addLog(project.id, 'info', `Container Docker parado (docker rm -f ${containerName})`);
   } catch (_) {
     // ignore: container can be absent
