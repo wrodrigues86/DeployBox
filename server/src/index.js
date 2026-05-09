@@ -305,6 +305,15 @@ const projectDirMode = /^[0-7]{3,4}$/.test(projectDirModeRaw)
   ? Number.parseInt(projectDirModeRaw.slice(-3), 8)
   : 0o777;
 
+function mkdirWithProjectMode(targetPath) {
+  fs.mkdirSync(targetPath, { recursive: true, mode: projectDirMode });
+  try {
+    fs.chmodSync(targetPath, projectDirMode);
+  } catch (_) {
+    // ignore permission apply errors on unsupported platforms
+  }
+}
+
 function slugifyName(value) {
   return String(value || '')
     .normalize('NFKD')
@@ -354,7 +363,7 @@ function writeTemplateRegistry(items) {
 }
 
 function ensureTemplatesRootDir() {
-  fs.mkdirSync(templatesRootDir, { recursive: true });
+  mkdirWithProjectMode(templatesRootDir);
 }
 
 function sanitizeTemplateRecord(record) {
@@ -1456,7 +1465,7 @@ app.post('/api/templates/upload', upload.single('file'), (req, res) => {
     ensureTemplatesRootDir();
     const targetDir = path.join(templatesRootDir, slug);
     if (fs.existsSync(targetDir)) fs.rmSync(targetDir, { recursive: true, force: true });
-    fs.mkdirSync(targetDir, { recursive: true });
+    mkdirWithProjectMode(targetDir);
 
     for (const entry of entries) {
       const normalized = path.posix.normalize(String(entry.entryName || '').replace(/\\/g, '/'));
@@ -1467,9 +1476,9 @@ app.post('/api/templates/upload', upload.single('file'), (req, res) => {
       const relCheck = path.relative(targetDir, targetPath);
       if (relCheck.startsWith('..') || path.isAbsolute(relCheck)) continue;
       if (entry.isDirectory) {
-        fs.mkdirSync(targetPath, { recursive: true });
+        mkdirWithProjectMode(targetPath);
       } else {
-        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+        mkdirWithProjectMode(path.dirname(targetPath));
         fs.writeFileSync(targetPath, entry.getData());
       }
     }
@@ -1527,14 +1536,9 @@ app.post('/api/install-template', (req, res) => {
     projectSlug = generateUniqueProjectSlug(projectBase);
   }
 
-  fs.mkdirSync(projectsRootDir, { recursive: true });
+  mkdirWithProjectMode(projectsRootDir);
   const targetProjectDir = path.join(projectsRootDir, projectSlug);
-  fs.mkdirSync(targetProjectDir, { recursive: true, mode: projectDirMode });
-  try {
-    fs.chmodSync(targetProjectDir, projectDirMode);
-  } catch (_) {
-    // ignore permission apply errors on unsupported platforms
-  }
+  mkdirWithProjectMode(targetProjectDir);
 
   const jobId = crypto.randomUUID();
   const job = {
@@ -2577,7 +2581,7 @@ app.put('/api/projects/:id/file', async (req, res) => {
   const delta = Math.max(0, nextSize - currentSize);
   if (!assertWithinStorageLimit(req, res, delta)) return;
 
-  fs.mkdirSync(path.dirname(full), { recursive: true });
+  mkdirWithProjectMode(path.dirname(full));
   let version = null;
   if (relPath === 'index.js') {
     version = writeProjectCode(project, content);
@@ -2626,7 +2630,7 @@ app.post('/api/projects/:id/folder', (req, res) => {
   if (relCheck.startsWith('..') || path.isAbsolute(relCheck)) return res.status(400).json({ error: 'path_outside_project' });
 
   try {
-    fs.mkdirSync(full, { recursive: true });
+    mkdirWithProjectMode(full);
     db.prepare('UPDATE projects SET updated_at = ? WHERE id = ?').run(nowIso(), project.id);
     addLog(project.id, 'info', `Pasta criada: ${relPath}`);
     return res.json({ ok: true, path: relPath });
@@ -2682,7 +2686,7 @@ app.post('/api/projects/:id/move', (req, res) => {
   }
 
   try {
-    fs.mkdirSync(path.dirname(toFull), { recursive: true });
+    mkdirWithProjectMode(path.dirname(toFull));
     fs.renameSync(fromFull, toFull);
     db.prepare('UPDATE projects SET updated_at = ? WHERE id = ?').run(nowIso(), project.id);
     addLog(project.id, 'warning', `Item movido: ${fromPath} -> ${toPath}`);
@@ -2738,11 +2742,11 @@ app.post('/api/projects/:id/upload-zip', upload.single('file'), async (req, res)
       }
 
       if (entry.isDirectory) {
-        fs.mkdirSync(fullPath, { recursive: true });
+        mkdirWithProjectMode(fullPath);
         continue;
       }
 
-      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+      mkdirWithProjectMode(path.dirname(fullPath));
       fs.writeFileSync(fullPath, entry.getData());
       filesWritten += 1;
     }

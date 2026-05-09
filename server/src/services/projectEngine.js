@@ -433,6 +433,23 @@ function normalizeDockerComposeFile(project) {
   if (next !== raw) fs.writeFileSync(composePath, next, 'utf8');
 }
 
+function shouldPreferCompose(project) {
+  const composePath = path.join(projectPath(project.slug), 'docker-compose.yml');
+  if (!fs.existsSync(composePath)) return false;
+  let composeContent = '';
+  try {
+    composeContent = fs.readFileSync(composePath, 'utf8');
+  } catch (_) {
+    return false;
+  }
+  const text = String(composeContent || '');
+  if (!/\bservices\s*:/.test(text)) return false;
+  if (/\bimage\s*:/.test(text)) return true;
+  if (/container_name\s*:\s*deploybox-\$\{PROJECT_SLUG:-app\}/.test(text)) return false;
+  if (/\bcontainer_name\s*:/.test(text)) return true;
+  return false;
+}
+
 async function runDockerCompose(project, args = '', extraEnv = {}) {
   const cwd = projectPath(project.slug);
   const composeEnv = { PROJECT_SLUG: safeSlug(project.slug), ...extraEnv };
@@ -467,6 +484,16 @@ export async function startDockerProject(project) {
   const containerName = dockerContainerName(project);
   const hostPort = String(env.DOCKER_HOST_PORT || env.HOST_PORT || env.PORT || '3000');
   const containerPort = String(env.DOCKER_CONTAINER_PORT || '3000');
+  const preferCompose = shouldPreferCompose(project);
+
+  if (preferCompose) {
+    await runDockerCompose(project, 'up -d --build', {
+      HOST_PORT: env.DOCKER_HOST_PORT || env.HOST_PORT || env.PORT || '',
+    });
+    setProjectStatus(project.id, 'running');
+    addLog(project.id, 'info', 'Container Docker iniciado (docker compose up -d --build)');
+    return;
+  }
 
   try {
     await runCommandFile(dockerBin, ['image', 'inspect', imageName], cwd);
