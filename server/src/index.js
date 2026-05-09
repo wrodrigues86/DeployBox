@@ -1503,7 +1503,10 @@ app.post('/api/install-template', (req, res) => {
 
   const requestedProjectName = normalizeTemplateSlug(req.body?.projectName);
   const projectBase = requestedProjectName || template.slug;
-  const projectSlug = generateUniqueProjectSlug(projectBase);
+  let projectSlug = generateUniqueProjectSlug(projectBase);
+  while (getProjectBySlug(projectSlug)) {
+    projectSlug = generateUniqueProjectSlug(projectBase);
+  }
 
   fs.mkdirSync(projectsRootDir, { recursive: true });
   const targetProjectDir = path.join(projectsRootDir, projectSlug);
@@ -1519,6 +1522,7 @@ app.post('/api/install-template', (req, res) => {
     id: jobId,
     template: templateSlug,
     project: projectSlug,
+    projectId: null,
     status: 'running',
     logs: [],
     createdAt: nowIso(),
@@ -1526,13 +1530,48 @@ app.post('/api/install-template', (req, res) => {
   };
   installJobs.set(jobId, job);
 
+  const dockerCode = `module.exports = {
+  // Projeto Docker gerenciado via docker compose
+};
+`;
+  const info = db
+    .prepare(
+      `INSERT INTO projects
+       (name, slug, description, type, worker_mode, cron_expression, code, api_key, api_secret, auth_enabled, rate_limit, active, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .run(
+      template.name || projectSlug,
+      projectSlug,
+      template.description || '',
+      'docker',
+      'manual',
+      null,
+      dockerCode,
+      `key_${Math.random().toString(36).slice(2, 12)}`,
+      `sec_${Math.random().toString(36).slice(2, 16)}`,
+      0,
+      120,
+      1,
+      'stopped',
+      nowIso(),
+      nowIso(),
+    );
+  job.projectId = Number(info.lastInsertRowid);
+  const createdProject = getProjectById(job.projectId);
+  ensureProjectFiles(createdProject);
+  writeProjectCode(createdProject, dockerCode);
+  db.prepare('INSERT OR IGNORE INTO project_env (project_id, env_key, env_value, is_secret) VALUES (?, ?, ?, 0)').run(createdProject.id, 'APP_NAME', createdProject.name);
+  persistEnvFile(createdProject);
+
   pushInstallLog(jobId, `🚀 Instalando ${template.name}...`);
-  pushInstallLog(jobId, `📁 Projeto criado: ${projectSlug}`);
+  pushInstallLog(jobId, `📁 Projeto criado: ${projectSlug} (id ${job.projectId})`);
   try {
     fs.cpSync(template.templateDir, targetProjectDir, { recursive: true });
     pushInstallLog(jobId, '📦 Template copiado para pasta de projeto.');
   } catch (copyError) {
     job.status = 'failed';
+    db.prepare('UPDATE projects SET status = ?, updated_at = ? WHERE id = ?').run('error', nowIso(), job.projectId);
     pushInstallLog(jobId, `❌ Falha ao copiar template: ${copyError.message}`);
     return res.status(500).json({ error: 'template_copy_failed', jobId });
   }
@@ -1542,14 +1581,16 @@ app.post('/api/install-template', (req, res) => {
   child.stderr.on('data', (chunk) => pushInstallLog(jobId, `⚠️ ${String(chunk).trim()}`));
   child.on('error', (error) => {
     job.status = 'failed';
+    db.prepare('UPDATE projects SET status = ?, updated_at = ? WHERE id = ?').run('error', nowIso(), job.projectId);
     pushInstallLog(jobId, `❌ Falha na instalação: ${error.message}`);
   });
   child.on('close', (code) => {
     job.status = code === 0 ? 'done' : 'failed';
+    db.prepare('UPDATE projects SET status = ?, updated_at = ? WHERE id = ?').run(code === 0 ? 'running' : 'error', nowIso(), job.projectId);
     pushInstallLog(jobId, code === 0 ? '✅ Instalação concluída.' : `❌ Instalação finalizada com código ${code}.`);
   });
 
-  return res.status(202).json({ ok: true, jobId, template: templateSlug, project: projectSlug });
+  return res.status(202).json({ ok: true, jobId, template: templateSlug, project: projectSlug, projectId: job.projectId });
 });
 
 app.get('/api/install-template/:jobId/logs', (req, res) => {
@@ -1693,6 +1734,7 @@ app.get('/api/projects', (req, res) => {
 app.post('/api/projects', async (req, res) => {
   try {
     if (!assertFullAdmin(req, res)) return;
+    const isAdmin = isFullAdmin(req);
     const data = req.body || {};
     if (!assertWithinStorageLimit(req, res, 64 * 1024)) return;
     const slug = String(data.slug || '').toLowerCase().replace(/[^a-z0-9-_]/g, '');
