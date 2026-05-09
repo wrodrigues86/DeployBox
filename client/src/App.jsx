@@ -42,6 +42,7 @@ const DEFAULT_TRANSLATIONS = {
   settings_menu_users: 'Usuï¿½rios e Permissï¿½es',
   settings_menu_translations: 'Traduï¿½ï¿½es',
   settings_menu_health: 'Saï¿½de do Sistema',
+  settings_menu_ssh: 'SSH',
   settings_scope_hint: 'Essas configuraï¿½ï¿½es sï¿½o do DeployBox (globais), nï¿½o do projeto selecionado.',
   settings_base_url_label: 'URL base da API principal',
   settings_default_rate_limit_label: 'Rate limit padrï¿½o para novos projetos',
@@ -217,10 +218,11 @@ const defaultTabBySection = {
   Configuracoes: null,
 }
 const settingsSidebarSubmenus = [
-    { key: 'templates', labelKey: 'settings_menu_templates', fallback: 'Templates de Aplicacao' },
+  { key: 'templates', labelKey: 'settings_menu_templates', fallback: 'Templates de Aplicacao' },
   { key: 'users', labelKey: 'settings_menu_users', fallback: 'Usuï¿½rios e Permissï¿½es' },
   { key: 'translations', labelKey: 'settings_menu_translations', fallback: 'Traduï¿½ï¿½es' },
   { key: 'health', labelKey: 'settings_menu_health', fallback: 'Saï¿½de do Sistema' },
+  { key: 'ssh', labelKey: 'settings_menu_ssh', fallback: 'SSH' },
 ]
 
 function cronPresetToExpr(preset, time, custom) {
@@ -526,6 +528,7 @@ export default function App() {
         ) : currentSection === 'Configuracoes' ? (
           <AppSettingsSection
             authHeaders={authHeaders}
+            token={token}
             projects={projects}
             me={me}
             t={t}
@@ -677,7 +680,7 @@ function DashboardSection({ dashboard, projects, t }) {
   )
 }
 
-function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, translations, translationLocale, translationLocales, onChangeTranslationLocale, onTranslationsUpdated, onRefreshProjects }) {
+function AppSettingsSection({ authHeaders, token, projects, me, t, activeSettingsTab, translations, translationLocale, translationLocales, onChangeTranslationLocale, onTranslationsUpdated, onRefreshProjects }) {
   const [baseUrl, setBaseUrl] = useState(localStorage.getItem('nodepanel_app_base_url') || window.location.origin)
   const [defaultRateLimit, setDefaultRateLimit] = useState(localStorage.getItem('nodepanel_default_rate_limit') || '120')
   const [autoRefreshSec, setAutoRefreshSec] = useState(localStorage.getItem('nodepanel_refresh_sec') || '5')
@@ -697,6 +700,12 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
   const [userDetailOpen, setUserDetailOpen] = useState(false)
   const [userSearch, setUserSearch] = useState('')
   const [userForm, setUserForm] = useState({ name: '', email: '', password: '', role: 'project_user', active: true, projectIds: [], storageLimitMB: '' })
+  const [sshConnected, setSshConnected] = useState(false)
+  const [sshOutput, setSshOutput] = useState('')
+  const [sshInput, setSshInput] = useState('')
+  const [sshStatus, setSshStatus] = useState('')
+  const sshSocketRef = useRef(null)
+  const sshOutputRef = useRef(null)
 
   async function save() {
     localStorage.setItem('nodepanel_app_base_url', baseUrl)
@@ -737,6 +746,39 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
   useEffect(() => {
     setTranslationJson(JSON.stringify(translations || {}, null, 2))
   }, [translations])
+
+  useEffect(() => {
+    if (activeSettingsTab !== 'ssh' || me?.role !== 'full_admin') return undefined
+    const socket = io('/', { transports: ['websocket'] })
+    sshSocketRef.current = socket
+
+    socket.on('ssh:data', (chunk) => {
+      setSshOutput((prev) => `${prev}${chunk}`)
+    })
+    socket.on('ssh:error', (payload) => {
+      setSshStatus(payload?.message || 'Erro na sessão SSH')
+      setSshConnected(false)
+    })
+    socket.on('ssh:status', (payload) => {
+      setSshConnected(!!payload?.connected)
+      if (payload?.message) setSshStatus(payload.message)
+      if (payload?.connected) setSshStatus('Conectado')
+    })
+
+    return () => {
+      try {
+        socket.emit('ssh:stop')
+      } catch (_) {}
+      socket.disconnect()
+      sshSocketRef.current = null
+      setSshConnected(false)
+    }
+  }, [activeSettingsTab, me?.role, authHeaders?.Authorization])
+
+  useEffect(() => {
+    if (!sshOutputRef.current) return
+    sshOutputRef.current.scrollTop = sshOutputRef.current.scrollHeight
+  }, [sshOutput])
 
 
   function resetUserForm() {
@@ -1242,6 +1284,78 @@ function AppSettingsSection({ authHeaders, projects, me, t, activeSettingsTab, t
               </div>
             )}
           </>
+        )}
+
+        {activeSettingsTab === 'ssh' && (
+          <div className="card p-4">
+            <h3 className="mb-3 text-lg font-semibold">Configurações &gt; SSH</h3>
+            {me?.role !== 'full_admin' ? (
+              <div className="rounded-lg border border-panel-border bg-slate-950/40 p-3 text-sm text-slate-300">
+                Apenas usuario full_admin pode acessar o terminal SSH.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    className="btn border-emerald-500 text-emerald-300"
+                    onClick={() => {
+                      setSshOutput('')
+                      setSshStatus('Conectando...')
+                      sshSocketRef.current?.emit('ssh:start', {
+                        token,
+                        cols: 140,
+                        rows: 36,
+                      })
+                    }}
+                    disabled={sshConnected}
+                  >
+                    Conectar
+                  </button>
+                  <button
+                    className="btn border-red-500 text-red-300"
+                    onClick={() => sshSocketRef.current?.emit('ssh:stop')}
+                    disabled={!sshConnected}
+                  >
+                    Desconectar
+                  </button>
+                  <div className="rounded-lg border border-panel-border bg-slate-950/40 px-3 py-2 text-xs text-slate-300">
+                    Status: {sshStatus || (sshConnected ? 'Conectado' : 'Desconectado')}
+                  </div>
+                </div>
+                <pre ref={sshOutputRef} className="h-[420px] overflow-auto rounded-lg border border-panel-border bg-black p-3 font-mono text-xs text-emerald-200">
+                  {sshOutput || 'Abra a sessão para iniciar o terminal.'}
+                </pre>
+                <div className="flex gap-2">
+                  <input
+                    className="input font-mono"
+                    placeholder="Digite o comando e pressione Enter"
+                    value={sshInput}
+                    onChange={(e) => setSshInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Enter') return
+                      e.preventDefault()
+                      if (!sshConnected) return
+                      const command = `${sshInput}\n`
+                      sshSocketRef.current?.emit('ssh:input', { token, data: command })
+                      setSshInput('')
+                    }}
+                  />
+                  <button
+                    className="btn"
+                    onClick={() => {
+                      if (!sshConnected) return
+                      const command = `${sshInput}\n`
+                      sshSocketRef.current?.emit('ssh:input', { token, data: command })
+                      setSshInput('')
+                    }}
+                    disabled={!sshConnected}
+                  >
+                    Enviar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         )}
     </div>
   )

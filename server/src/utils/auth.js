@@ -23,3 +23,7 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'invalid_token' });
   }
 }
+
+export function verifyToken(token) {
+  return jwt.verify(token, JWT_SECRET);
+}

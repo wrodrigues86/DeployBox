@@ -13,6 +13,7 @@ import multer from 'multer';
 import AdmZip from 'adm-zip';
 import { exec, spawn } from 'node:child_process';
 import { Server } from 'socket.io';
+import { Client as SshClient } from 'ssh2';
 import { initMainDatabase, db, nowIso } from './services/database.js';
 import {
   bootAllProjects,
@@ -35,7 +36,7 @@ import {
   writeProjectCode,
 } from './services/projectEngine.js';
 import { addLog, setSocketServer } from './services/logger.js';
-import { requireAuth, signToken } from './utils/auth.js';
+import { requireAuth, signToken, verifyToken } from './utils/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -141,6 +142,131 @@ io.on('connection', (socket) => {
   socket.on('project:join', (projectId) => {
     socket.join(`project:${projectId}`);
   });
+
+  let sshClient = null;
+  let sshStream = null;
+
+  function closeSshSession() {
+    try {
+      if (sshStream) sshStream.end();
+    } catch (_) {
+      // ignore
+    }
+    try {
+      if (sshClient) sshClient.end();
+    } catch (_) {
+      // ignore
+    }
+    sshStream = null;
+    sshClient = null;
+  }
+
+  socket.on('ssh:start', ({ token, cols, rows } = {}) => {
+    try {
+      const user = verifyToken(String(token || '').trim());
+      if (user?.role !== 'full_admin') {
+        socket.emit('ssh:error', { message: 'Acesso negado. Apenas full_admin.' });
+        return;
+      }
+    } catch (_) {
+      socket.emit('ssh:error', { message: 'Token inválido.' });
+      return;
+    }
+
+    const host = String(process.env.SSH_HOST || '').trim();
+    const username = String(process.env.SSH_USERNAME || '').trim();
+    const password = String(process.env.SSH_PASSWORD || '').trim();
+    const privateKeyRaw = String(process.env.SSH_PRIVATE_KEY || '');
+    const passphrase = String(process.env.SSH_PASSPHRASE || '').trim();
+    const portValue = Number(process.env.SSH_PORT || 22);
+    const port = Number.isFinite(portValue) && portValue > 0 ? portValue : 22;
+
+    if (!host || !username) {
+      socket.emit('ssh:error', { message: 'Configure SSH_HOST e SSH_USERNAME no .env.' });
+      return;
+    }
+
+    const privateKey = privateKeyRaw.includes('\\n') ? privateKeyRaw.replace(/\\n/g, '\n') : privateKeyRaw;
+
+    if (!password && !privateKey.trim()) {
+      socket.emit('ssh:error', { message: 'Configure SSH_PRIVATE_KEY ou SSH_PASSWORD no .env.' });
+      return;
+    }
+
+    closeSshSession();
+
+    sshClient = new SshClient();
+    sshClient
+      .on('ready', () => {
+        sshClient.shell(
+          {
+            cols: Math.max(40, Number(cols || 120)),
+            rows: Math.max(10, Number(rows || 30)),
+            term: 'xterm-256color',
+          },
+          (err, stream) => {
+            if (err) {
+              socket.emit('ssh:error', { message: `Falha ao abrir shell: ${err.message}` });
+              closeSshSession();
+              return;
+            }
+            sshStream = stream;
+            socket.emit('ssh:status', { connected: true });
+            stream.on('data', (chunk) => socket.emit('ssh:data', chunk.toString('utf8')));
+            stream.on('close', () => {
+              socket.emit('ssh:status', { connected: false, message: 'Sessão encerrada.' });
+              closeSshSession();
+            });
+          },
+        );
+      })
+      .on('error', (err) => {
+        socket.emit('ssh:error', { message: `Erro SSH: ${err.message}` });
+        closeSshSession();
+      })
+      .on('end', () => {
+        socket.emit('ssh:status', { connected: false, message: 'Conexão finalizada.' });
+        closeSshSession();
+      })
+      .connect({
+        host,
+        port,
+        username,
+        password: password || undefined,
+        privateKey: privateKey.trim() ? privateKey : undefined,
+        passphrase: passphrase || undefined,
+        readyTimeout: 15000,
+      });
+  });
+
+  socket.on('ssh:input', ({ token, data } = {}) => {
+    try {
+      const user = verifyToken(String(token || '').trim());
+      if (user?.role !== 'full_admin') return;
+    } catch (_) {
+      return;
+    }
+    if (!sshStream) return;
+    sshStream.write(String(data || ''));
+  });
+
+  socket.on('ssh:resize', ({ token, cols, rows } = {}) => {
+    try {
+      const user = verifyToken(String(token || '').trim());
+      if (user?.role !== 'full_admin') return;
+    } catch (_) {
+      return;
+    }
+    if (!sshStream) return;
+    try {
+      sshStream.setWindow(Math.max(40, Number(cols || 120)), Math.max(10, Number(rows || 30)), 0, 0);
+    } catch (_) {
+      // ignore resize failure
+    }
+  });
+
+  socket.on('ssh:stop', () => closeSshSession());
+  socket.on('disconnect', () => closeSshSession());
 });
 
 function sanitizeProject(project) {
