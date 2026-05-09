@@ -426,11 +426,40 @@ function normalizeDockerComposeFile(project) {
   if (!fs.existsSync(composePath)) return;
   const raw = fs.readFileSync(composePath, 'utf8');
   let next = raw;
+  next = next.replace('container_name: n8n_app', 'container_name: deploybox-${PROJECT_SLUG:-app}');
   next = next.replace('container_name: deploybox-${PROJECT_SLUG}', 'container_name: deploybox-${PROJECT_SLUG:-app}');
   next = next.replace('container_name: deploybox-${PROJECT_SLUG:-app:-app}', 'container_name: deploybox-${PROJECT_SLUG:-app}');
+  next = next.replace('"5678:5678"', '"${DOCKER_HOST_PORT:-5678}:${DOCKER_CONTAINER_PORT:-5678}"');
+  next = next.replace('- N8N_PORT=5678', '- N8N_PORT=${DOCKER_CONTAINER_PORT:-5678}');
   next = next.replace('- PORT=3000', '- PORT=${DOCKER_CONTAINER_PORT:-3000}');
   next = next.replace('"${HOST_PORT:-3000}:3000"', '"${DOCKER_HOST_PORT:-3000}:${DOCKER_CONTAINER_PORT:-3000}"');
   if (next !== raw) fs.writeFileSync(composePath, next, 'utf8');
+}
+
+function ensureComposeHostDirs(project) {
+  const composePath = path.join(projectPath(project.slug), 'docker-compose.yml');
+  if (!fs.existsSync(composePath)) return;
+  let raw = '';
+  try {
+    raw = fs.readFileSync(composePath, 'utf8');
+  } catch (_) {
+    return;
+  }
+  const root = projectPath(project.slug);
+  const matches = [...String(raw).matchAll(/-\s+\.(\/[^:\s]+):/g)];
+  for (const match of matches) {
+    const hostRel = String(match?.[1] || '');
+    if (!hostRel.startsWith('/')) continue;
+    const full = path.join(root, hostRel.replace(/^\//, ''));
+    const relCheck = path.relative(root, full);
+    if (relCheck.startsWith('..') || path.isAbsolute(relCheck)) continue;
+    try {
+      fs.mkdirSync(full, { recursive: true, mode: PROJECT_DIR_MODE });
+      fs.chmodSync(full, PROJECT_DIR_MODE);
+    } catch (_) {
+      // ignore permission apply errors on unsupported platforms
+    }
+  }
 }
 
 function shouldPreferCompose(project) {
@@ -476,6 +505,7 @@ async function runDockerCompose(project, args = '', extraEnv = {}) {
 export async function startDockerProject(project) {
   ensureProjectFiles(project);
   normalizeDockerComposeFile(project);
+  ensureComposeHostDirs(project);
   const env = loadEnv(project.id, project.slug);
   const dockerCli = resolveDockerCliPath();
   const dockerBin = String(dockerCli || 'docker').trim().split(/\s+/)[0] || 'docker';
