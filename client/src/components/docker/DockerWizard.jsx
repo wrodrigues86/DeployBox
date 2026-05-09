@@ -69,11 +69,17 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onSucc
         if (data?.status === 'done' || data?.status === 'failed') {
           clearInterval(timer)
           setInstalling(false)
-          if (data?.status === 'done') onSuccess?.('install')
+          if (data?.status === 'done') {
+            onSuccess?.('install')
+          } else {
+            const lastLog = Array.isArray(data?.logs) && data.logs.length ? String(data.logs[data.logs.length - 1]) : ''
+            setError(lastLog || 'Instalacao finalizada com falha. Verifique os logs.')
+          }
         }
       } catch (_) {
         clearInterval(timer)
         setInstalling(false)
+        setError('Falha ao acompanhar logs da instalacao.')
       }
     }, 1200)
     return () => {

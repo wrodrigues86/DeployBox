@@ -1644,6 +1644,8 @@ function Card({ title, value }) {
 }
 
 function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated, onDone }) {
+  const [installNotice, setInstallNotice] = useState('')
+
   async function handleDockerCreate(dockerPayload) {
     const baseSlug = String(dockerPayload.slug || '').trim()
     const baseName = String(dockerPayload.name || '').trim() || 'Aplicaï¿½ï¿½o'
@@ -1781,13 +1783,21 @@ function CreateApplicationSection({ authHeaders, loading, t, onCreate, onCreated
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold">{t('menu_create_application', 'Criar Aplicaï¿½ï¿½o')}</h2>
         </div>
+        {!!installNotice && (
+          <div className="mb-4 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+            {installNotice}
+          </div>
+        )}
         <DockerWizard
           authHeaders={authHeaders}
           t={t}
           loading={loading}
           onCancel={() => onDone?.()}
           onCreate={handleDockerCreate}
-          onSuccess={() => onDone?.()}
+          onSuccess={() => {
+            onCreated?.()
+            setInstallNotice('Instalação concluída. Os logs permanecem nesta tela para conferência.')
+          }}
         />
       </div>
     </div>
