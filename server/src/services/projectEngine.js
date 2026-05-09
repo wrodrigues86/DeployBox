@@ -13,6 +13,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '../..');
 const projectsRoot = path.join(rootDir, 'projects');
+const PROJECT_DIR_MODE_RAW = String(process.env.PROJECT_DIR_MODE || '0777').trim();
+const PROJECT_DIR_MODE = /^[0-7]{3,4}$/.test(PROJECT_DIR_MODE_RAW)
+  ? Number.parseInt(PROJECT_DIR_MODE_RAW.slice(-3), 8)
+  : 0o777;
 const runtime = {
   workers: new Map(),
   apiCache: new Map(),
@@ -132,8 +136,14 @@ export function projectPath(slug) {
 export function ensureProjectFiles(project) {
   const dir = projectPath(project.slug);
   const versionsDir = path.join(dir, 'versions');
-  fs.mkdirSync(dir, { recursive: true });
-  fs.mkdirSync(versionsDir, { recursive: true });
+  fs.mkdirSync(dir, { recursive: true, mode: PROJECT_DIR_MODE });
+  fs.mkdirSync(versionsDir, { recursive: true, mode: PROJECT_DIR_MODE });
+  try {
+    fs.chmodSync(dir, PROJECT_DIR_MODE);
+    fs.chmodSync(versionsDir, PROJECT_DIR_MODE);
+  } catch (_) {
+    // ignore permission apply errors on unsupported platforms
+  }
 
   const codePath = path.join(dir, 'index.js');
   const packagePath = path.join(dir, 'package.json');

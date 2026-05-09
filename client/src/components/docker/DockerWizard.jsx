@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useRef, useState } from 'react'
 import axios from 'axios'
 
 const api = axios.create({ baseURL: '/api' })
@@ -33,6 +33,10 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onSucc
   const [jobLogs, setJobLogs] = useState([])
   const [jobStatus, setJobStatus] = useState('idle')
   const [error, setError] = useState('')
+  const [stalledWarning, setStalledWarning] = useState('')
+  const [lastUpdatedAt, setLastUpdatedAt] = useState('')
+  const stallCountRef = useRef(0)
+  const lastLogSignatureRef = useRef('')
 
   useEffect(() => {
     let cancelled = false
@@ -60,12 +64,29 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onSucc
   useEffect(() => {
     if (!jobId) return
     let active = true
+    stallCountRef.current = 0
+    lastLogSignatureRef.current = ''
+    setStalledWarning('')
     const timer = setInterval(async () => {
       try {
         const { data } = await api.get(`/install-template/${jobId}/logs`, { headers: authHeaders })
         if (!active) return
-        setJobLogs(Array.isArray(data?.logs) ? data.logs : [])
-        setJobStatus(String(data?.status || 'running'))
+        const nextLogs = Array.isArray(data?.logs) ? data.logs : []
+        const nextStatus = String(data?.status || 'running')
+        setJobLogs(nextLogs)
+        setJobStatus(nextStatus)
+        setLastUpdatedAt(String(data?.updatedAt || ''))
+        const signature = `${nextLogs.length}:${nextLogs[nextLogs.length - 1] || ''}`
+        if (signature === lastLogSignatureRef.current && nextStatus === 'running') {
+          stallCountRef.current += 1
+        } else {
+          stallCountRef.current = 0
+          setStalledWarning('')
+        }
+        lastLogSignatureRef.current = signature
+        if (stallCountRef.current >= 15) {
+          setStalledWarning('Instalacao sem novos logs por um tempo. Verifique Docker/permissoes no servidor.')
+        }
         if (data?.status === 'done' || data?.status === 'failed') {
           clearInterval(timer)
           setInstalling(false)
@@ -95,6 +116,8 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onSucc
 
   async function handleInstall() {
     setError('')
+    setStalledWarning('')
+    setLastUpdatedAt('')
     if (!selected?.slug) return setError('Selecione um template.')
     const safeProjectName = slugify(projectName || selected.slug)
     if (!safeProjectName) return setError('Informe um nome de projeto valido.')
@@ -163,6 +186,12 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onSucc
 
       <SectionCard title="Logs de Instalacao" subtitle="Acompanhe em tempo real.">
         <div className="mb-2 text-xs text-slate-400">Status: {jobStatus}</div>
+        {lastUpdatedAt ? <div className="mb-2 text-[11px] text-slate-500">Ultima atualizacao: {new Date(lastUpdatedAt).toLocaleString()}</div> : null}
+        {stalledWarning ? (
+          <div className="mb-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-2 py-1.5 text-xs text-amber-200">
+            {stalledWarning}
+          </div>
+        ) : null}
         <pre className="w-full min-w-0 max-h-[320px] overflow-auto whitespace-pre-wrap break-all rounded-lg border border-slate-700 bg-slate-950 p-3 text-xs text-slate-200">
           {jobLogs.length ? jobLogs.join('\n') : 'Sem logs ainda.'}
         </pre>
@@ -183,3 +212,4 @@ export default function DockerWizard({ authHeaders, t, loading, onCancel, onSucc
     </div>
   )
 }
+

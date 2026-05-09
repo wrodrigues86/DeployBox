@@ -300,6 +300,10 @@ const projectsRootDir = path.resolve(appRootDir, '..', 'projects');
 const templateRegistrySettingKey = 'docker_templates_registry_v1';
 const templateRequiredFields = ['Name', 'Description', 'icon', 'Command'];
 const installJobs = new Map();
+const projectDirModeRaw = String(process.env.PROJECT_DIR_MODE || '0777').trim();
+const projectDirMode = /^[0-7]{3,4}$/.test(projectDirModeRaw)
+  ? Number.parseInt(projectDirModeRaw.slice(-3), 8)
+  : 0o777;
 
 function slugifyName(value) {
   return String(value || '')
@@ -1503,7 +1507,12 @@ app.post('/api/install-template', (req, res) => {
 
   fs.mkdirSync(projectsRootDir, { recursive: true });
   const targetProjectDir = path.join(projectsRootDir, projectSlug);
-  fs.mkdirSync(targetProjectDir, { recursive: true });
+  fs.mkdirSync(targetProjectDir, { recursive: true, mode: projectDirMode });
+  try {
+    fs.chmodSync(targetProjectDir, projectDirMode);
+  } catch (_) {
+    // ignore permission apply errors on unsupported platforms
+  }
 
   const jobId = crypto.randomUUID();
   const job = {
