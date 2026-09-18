@@ -3,18 +3,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+
+    container_name: nodepanel
+
     restart: unless-stopped
+
     ports:
       - "4000:4000"
+
     environment:
       NODE_ENV: production
       PORT: "4000"
-    volumes:
-      - nodepanel_data:/app/data
-      - nodepanel_projects:/app/projects
-      - nodepanel_templates:/app/templates
-
-volumes:
-  nodepanel_data:
-  nodepanel_projects:
-  nodepanel_templates:
